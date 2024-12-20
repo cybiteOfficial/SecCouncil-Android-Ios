@@ -46,7 +46,7 @@ fun SecCouncilTheme(
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
 
-        darkTheme -> DarkColorScheme
+        darkTheme -> LightColorScheme // No dark mode
         else -> LightColorScheme
     }
 

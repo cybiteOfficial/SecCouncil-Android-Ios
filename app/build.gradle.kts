@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "com.example.seccouncil"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.example.seccouncil"
@@ -56,4 +56,9 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    // Splash Screen Api
+    implementation("androidx.core:core-splashscreen:1.0.0")
+
+
 }
