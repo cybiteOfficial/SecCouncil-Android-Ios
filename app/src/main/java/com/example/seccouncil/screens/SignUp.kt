@@ -6,17 +6,20 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Card
@@ -43,7 +46,6 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -54,7 +56,10 @@ import com.example.seccouncil.R
 @Composable
 fun SignUp(){
    Column(
-
+    modifier = Modifier
+        .safeDrawingPadding()
+        .navigationBarsPadding()
+        .verticalScroll(state=rememberScrollState())
    ){
        Card(
            modifier = Modifier.fillMaxWidth()
@@ -71,9 +76,7 @@ fun SignUp(){
             // placing bottom card into top of top card
        Card(
            modifier = Modifier
-               .fillMaxHeight()
-               .navigationBarsPadding()
-               .fillMaxWidth()
+               .fillMaxSize()
                .offset(y = (-20).dp) // Adjust the vertical position to overlap the first card
                .clip(RoundedCornerShape(20.dp)),
            colors = CardDefaults.cardColors(
@@ -163,7 +166,10 @@ fun SignUpContent(){
         }
        Dividerr()
         Spacer(Modifier.height(25.dp))
-        BottomContent()
+        BottomContent(
+            normaltext = "Already have an account?",
+            clickabletext = "Log in"
+        )
     }
 }
 
@@ -227,14 +233,18 @@ fun Dividerr(){
 }
 
 @Composable
-fun BottomContent() {
+fun BottomContent(
+    modifier: Modifier = Modifier,
+    normaltext:String,
+    clickabletext:String
+) {
     Column() {
         Row(
             modifier = Modifier
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(
-                10.dp,
+                15.dp,
                 alignment = Alignment.CenterHorizontally
             )
         ) {
@@ -259,12 +269,12 @@ fun BottomContent() {
 
         ) {
             Text(
-                text = "Already have an account?",
+                text = normaltext,
                 fontFamily = FontFamily.Serif
             )
             ClickableText(
                 text = AnnotatedString(
-                    text = "Log in"
+                    text = clickabletext
                 ),
                 onClick = {},
                 style = TextStyle(
