@@ -11,4 +11,5 @@
     <color name="place_holder">#80000000</color>
     <color name="edit_box_background">#E3E3E4</color>
     <color name="image_background">#E4E2E2</color>  // #F7F7F8
+    <color name="markallasread">#00488D</color>
 </resources>
