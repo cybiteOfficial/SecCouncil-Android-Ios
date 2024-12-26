@@ -24,6 +24,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -150,7 +151,6 @@ fun OtpContent(){
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OtpBox(
     modifier: Modifier = Modifier,
@@ -162,10 +162,13 @@ fun OtpBox(
         modifier = Modifier
             .size(50.dp)
             .clip(RoundedCornerShape(10.dp)),
-        colors = TextFieldDefaults.textFieldColors(
-            containerColor = colorResource(R.color.edit_box_background),
+        colors = TextFieldDefaults.colors(
+            focusedContainerColor = colorResource(R.color.edit_box_background),
+            unfocusedContainerColor = colorResource(R.color.edit_box_background),
+            disabledContainerColor = colorResource(R.color.edit_box_background),
             focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent
+            unfocusedIndicatorColor = Color.Transparent,
+            disabledIndicatorColor = Color.Transparent
         ),
         keyboardOptions = KeyboardOptions.Default.copy(
             keyboardType = KeyboardType.Text,
