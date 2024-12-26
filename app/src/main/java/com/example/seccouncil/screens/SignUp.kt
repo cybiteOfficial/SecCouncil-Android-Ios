@@ -178,7 +178,8 @@ fun SignUpContent(){
 fun InputField(
     placeHolderText:String,
     imeAction: ImeAction,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    containerColor: Color = colorResource(R.color.edit_box_background)
 ){
     TextField(
         value = "",
@@ -186,10 +187,13 @@ fun InputField(
         modifier = Modifier.fillMaxWidth()
             .padding(start = 15.dp, end = 15.dp)
             .clip(RoundedCornerShape(10.dp)),
-        colors = TextFieldDefaults.textFieldColors(
-            containerColor = colorResource(R.color.edit_box_background),
+        colors = TextFieldDefaults.colors(
+            focusedContainerColor = containerColor,
+            unfocusedContainerColor = containerColor,
+            disabledContainerColor = containerColor,
             focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent
+            unfocusedIndicatorColor = Color.Transparent,
+            disabledIndicatorColor = Color.Transparent
         ),
         keyboardOptions = KeyboardOptions.Default.copy(
             keyboardType = KeyboardType.Text,
