@@ -2,10 +2,12 @@ package com.example.seccouncil.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -14,6 +16,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -46,132 +49,97 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.seccouncil.R
+import com.example.seccouncil.common.BottomContent
+import com.example.seccouncil.common.BottomText
+import com.example.seccouncil.common.Dividerr
+import com.example.seccouncil.ui.theme.urbanist
 
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun SignUp(){
+fun SignUp(
+    onLoginClick:()->Unit = {}
+){
    Column(
     modifier = Modifier
-        .safeDrawingPadding()
+        .fillMaxSize()
         .navigationBarsPadding()
+        .statusBarsPadding()
         .verticalScroll(state=rememberScrollState())
    ){
-       Card(
-           modifier = Modifier.fillMaxWidth()
-               .clip(RoundedCornerShape(bottomStart = 0.dp, bottomEnd = 0.dp))
-       ) {
-           Image(
-               painter = painterResource(R.drawable.seec_1),
-               contentDescription = null,
-               modifier = Modifier.background(color = colorResource(R.color.image_background))
-                   .fillMaxWidth(),
-               contentScale = ContentScale.Crop
-           )
-       }
-            // placing bottom card into top of top card
-       Card(
-           modifier = Modifier
-               .fillMaxSize()
-               .offset(y = (-20).dp) // Adjust the vertical position to overlap the first card
-               .clip(RoundedCornerShape(20.dp)),
-           colors = CardDefaults.cardColors(
-               containerColor = colorResource(R.color.white),
-               contentColor = colorResource(R.color.black),
-               disabledContentColor = colorResource(R.color.black),
-               disabledContainerColor = colorResource(R.color.white)
+       SignUpContent()
+       BottomContent()
+       Spacer(Modifier.weight(1f))
+       BottomText(
+           normaltext = "Already have an account?",
+           clickabletext = "Login Now",
+           onClick = onLoginClick
        )
-       ){
-            SignUpContent()
+       Spacer(Modifier.height(28.dp))
        }
    }
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SignUpContent(){
-    Text(
-        text = "Sign up",
-        fontStyle = FontStyle.Normal,
-        fontWeight = FontWeight.ExtraBold,
-        fontFamily = FontFamily.Serif,
-        fontSize = 25.sp,
-        modifier = Modifier.padding(start = 15.dp, top = 30.dp)
-    )
-    Spacer(modifier = Modifier.height(45.dp))
-    Column(
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        InputField(placeHolderText = "Full Name", imeAction = ImeAction.Next)
-        Spacer(Modifier.height(20.dp))
-        InputField(placeHolderText = "Enter Email/Phone No.", imeAction = ImeAction.Next)
-        Spacer(Modifier.height(20.dp))
-        InputField(placeHolderText = "Password", imeAction = ImeAction.Done)
-        Spacer(Modifier.height(35.dp))
-        Button(
-            onClick = {},
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 15.dp, end = 15.dp)
-                .height(50.dp),
-            shape = RoundedCornerShape(10.dp) // To Clip the Corner of the Button
-            ,
-            colors = ButtonColors(
-                containerColor = colorResource(R.color.button_color),
-                disabledContainerColor = colorResource(R.color.button_color),
-                contentColor = Color.Black,
-                disabledContentColor = Color.Black
-            )
-
+fun SignUpContent(
+    onLoginClick: () -> Unit = {}
+){
+        Column(
+            modifier = Modifier.fillMaxSize()
         ) {
             Text(
-                text = "Sign up",
-                fontFamily = FontFamily.Monospace,
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp
-            )
-        }
-        Row(
-            modifier = Modifier
-                .wrapContentSize(),
-            verticalAlignment = Alignment.CenterVertically
-        ){
-            Checkbox(
-                checked = false,
-                onCheckedChange = {},
-                colors = CheckboxColors(
-                    checkedBorderColor = Color.Gray, // Border color when checked
-                    uncheckedBorderColor = Color.Gray, // Border color when unchecked,
-                    checkedCheckmarkColor = Color.Black,
-                    uncheckedCheckmarkColor = Color.Black,
-                    uncheckedBoxColor = Color.Transparent, // No background when unchecked
-                    checkedBoxColor = Color.Transparent, // No background when checked
-                    disabledCheckedBoxColor = Color.Transparent, // Transparent background when disabled and checked
-                    disabledUncheckedBoxColor = Color.Transparent, // Transparent background when disabled and unchecked
-                    disabledBorderColor = Color.Gray, // Gray border for disabled checkbox
-                    disabledUncheckedBorderColor = Color.Gray, // Gray border for disabled unchecked checkbox,
-                    disabledIndeterminateBorderColor = Color.Transparent,
-                    disabledIndeterminateBoxColor = Color.Transparent
+                text = "Hello! Register to get\nstarted",
+                style = TextStyle(
+                    fontSize = 32.sp,
+                    fontFamily = urbanist,
+                    fontWeight = FontWeight.Bold
                 ),
-                modifier = Modifier.padding(start = 3.dp)
+                modifier = Modifier
+                    .padding(start = 15.dp, top = 80.dp)
             )
-            Text(
-                text = "I Agree with terms of service and Privacy Policy",
-                fontFamily = FontFamily.Serif
-            )
+            Spacer(modifier = Modifier.height(32.dp))
+            InputField(placeHolderText = "Username", imeAction = ImeAction.Next)
+            Spacer(Modifier.height(12.dp))
+            InputField(placeHolderText = "Email", imeAction = ImeAction.Next)
+            Spacer(Modifier.height(12.dp))
+            InputField(placeHolderText = "Password", imeAction = ImeAction.Next)
+            Spacer(Modifier.height(12.dp))
+            InputField(placeHolderText = "Confirm password", imeAction = ImeAction.Done)
+            Spacer(Modifier.height(30.dp))
+            Button(
+                onClick = {},
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 15.dp, end = 15.dp)
+                    .height(50.dp),
+                shape = RoundedCornerShape(10.dp) // To Clip the Corner of the Button
+                ,
+                colors = ButtonColors(
+                    containerColor = Color.Black,
+                    disabledContainerColor = Color.Black,
+                    contentColor = Color.White,
+                    disabledContentColor = Color.White
+                )
+            ) {
+                Text(
+                    text = "Register",
+                    fontFamily = FontFamily.SansSerif,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 16.sp
+                )
+            }
+            Spacer(Modifier.height(35.dp))
+            Dividerr()
+            Spacer(Modifier.height(16.dp))
         }
-       Dividerr()
-        Spacer(Modifier.height(25.dp))
-        BottomContent(
-            normaltext = "Already have an account?",
-            clickabletext = "Log in"
-        )
+
     }
-}
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -201,96 +169,16 @@ fun InputField(
         ),
         placeholder = { Text(
             text = placeHolderText,
-            fontFamily = FontFamily.Monospace,
+            fontFamily = FontFamily.SansSerif,
+            fontWeight = FontWeight.Normal,
             color = colorResource(R.color.place_holder),
             modifier = Modifier.padding(start = 15.dp)
         ) }
     )
 }
 
-@Composable
-fun Dividerr(){
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp, horizontal = 15.dp), // Add vertical padding for spacing
-        verticalAlignment = Alignment.CenterVertically // Vertically center content
-    ) {
-        HorizontalDivider(modifier = Modifier
-            .weight(1f)
-            .padding(start = 11.dp)
-            .fillMaxWidth()
-            , color = Color.Black
-        ) // Line on the left
-        Text(
-            text="or",
-            modifier = Modifier
-                .align(Alignment.CenterVertically), // Text in the middle
-            fontSize = 15.sp,
-            fontWeight = FontWeight.Medium,
-            fontStyle = FontStyle.Normal,
-            color = Color.Black,
-            fontFamily = FontFamily.Serif
-        )
-        HorizontalDivider(modifier = Modifier.weight(1f), color = Color.Black) // Line on the right
-    }
-}
 
-@Composable
-fun BottomContent(
-    modifier: Modifier = Modifier,
-    normaltext:String,
-    clickabletext:String
-) {
-    Column() {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(
-                15.dp,
-                alignment = Alignment.CenterHorizontally
-            )
-        ) {
-            Image(
-                painter = painterResource(R.drawable.google_login),
-                contentDescription = null,
-                modifier = Modifier
-                    .size(35.dp)
-            )
-            Image(
-                painter = painterResource(R.drawable.facebook_login),
-                contentDescription = null,
-                modifier = Modifier
-                    .size(35.dp)
-            )
-        }
-        Spacer(Modifier.height(10.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
 
-        ) {
-            Text(
-                text = normaltext,
-                fontFamily = FontFamily.Serif
-            )
-            ClickableText(
-                text = AnnotatedString(
-                    text = clickabletext
-                ),
-                onClick = {},
-                style = TextStyle(
-                  //  textDecoration = TextDecoration.Underline,
-                    color = Color.Blue,
-                    fontFamily = FontFamily.SansSerif
-                ),
-                modifier = Modifier
-                    .padding(start = 5.dp),
-            )
-        }
-    }
-}
+
 
 
