@@ -1,97 +1,85 @@
 package com.example.seccouncil.screens
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.seccouncil.R
+import com.example.seccouncil.common.BottomContent
+import com.example.seccouncil.common.BottomText
+import com.example.seccouncil.common.Dividerr
+import com.example.seccouncil.ui.theme.UrbanistTitleStyle
+import com.example.seccouncil.ui.theme.urbanist
 
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun Login(){
+fun Login(
+    onLoginClicked:()->Unit ={}
+){
     Column(
     modifier = Modifier
         .safeDrawingPadding()
         .navigationBarsPadding()
     ){
-        Card(
-            modifier = Modifier.fillMaxWidth()
-                .clip(RoundedCornerShape(bottomStart = 0.dp, bottomEnd = 0.dp))
-        ) {
-            Image(
-                painter = painterResource(R.drawable.seec_1),
-                contentDescription = null,
-                modifier = Modifier.background(color = colorResource(R.color.image_background))
-                    .fillMaxWidth(),
-                contentScale = ContentScale.Crop
-            )
-        }
-        // placing bottom card into top of top card
-        Card(
+
+        Column(
             modifier = Modifier
-                .fillMaxSize()
-                .offset(y = (-20).dp) // Adjust the vertical position to overlap the first card
-                .clip(RoundedCornerShape(20.dp)),
-            colors = CardDefaults.cardColors(
-                containerColor = colorResource(R.color.white),
-                contentColor = colorResource(R.color.black),
-                disabledContentColor = colorResource(R.color.black),
-                disabledContainerColor = colorResource(R.color.white)
-            )
+                .fillMaxSize(),
         ){
-            LoginContent()
+            LoginContent(
+                onLoginClicked = onLoginClicked
+            )
+            Spacer(Modifier.height(16.dp))
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginContent(){
+fun LoginContent(
+    onLoginClicked: () -> Unit={}
+){
     Text(
-        text = "Log in",
-        fontStyle = FontStyle.Normal,
-        fontWeight = FontWeight.ExtraBold,
-        fontFamily = FontFamily.Serif,
-        fontSize = 25.sp,
-        modifier = Modifier.padding(start = 15.dp, top = 30.dp)
+        text = "Welcome back! Glad \nto see you, Again!",
+        style = TextStyle(
+            fontSize = 32.sp,
+            fontFamily = urbanist,
+            fontWeight = FontWeight.Bold
+        ),
+        modifier = Modifier
+            .padding(start = 15.dp, top = 80.dp)
     )
-    Spacer(modifier = Modifier.height(45.dp))
+    Spacer(modifier = Modifier.height(28.dp))
     Column(
         modifier = Modifier.fillMaxWidth()
     ) {
-        InputField(placeHolderText = "Enter Email/Phone No.", imeAction = ImeAction.Done)
-        Spacer(Modifier.height(45.dp))
+        InputField(placeHolderText = "Enter your email", imeAction = ImeAction.Done)
+        Spacer(Modifier.height(16.dp))
+        InputField(placeHolderText = "Enter your password", imeAction = ImeAction.Done)
+        Spacer(Modifier.height(16.dp))
         Button(
-            onClick = {},
+            onClick = onLoginClicked ,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(start = 15.dp, end = 15.dp)
@@ -99,26 +87,52 @@ fun LoginContent(){
             shape = RoundedCornerShape(10.dp) // To Clip the Corner of the Button
             ,
             colors = ButtonColors(
-                containerColor = colorResource(R.color.button_color),
-                disabledContainerColor = colorResource(R.color.button_color),
+                containerColor = Color.Black,
+                disabledContainerColor = Color.Black,
                 contentColor = Color.Black,
                 disabledContentColor = Color.Black
             )
 
         ) {
             Text(
-                text = "Log in",
-                fontFamily = FontFamily.Monospace,
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp
+                text = "Login",
+                style = UrbanistTitleStyle.copy(
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold
+                ),
+                color = Color.White
+                ,
             )
         }
-        Spacer(Modifier.height(35.dp))
-        Dividerr()
-        Spacer(Modifier.height(25.dp))
+        Spacer(Modifier.height(16.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 15.dp), // Makes the Row take full width
+            horizontalArrangement = Arrangement.End // Aligns the content to the end (right)
+        ) {
+            Text(
+                text = "Forget Password?",
+                style = TextStyle(
+                    fontFamily = urbanist,
+                    fontWeight = FontWeight.SemiBold
+                ),
+                color = colorResource(R.color.forgetPassword)
+            )
+        }
+
+        Spacer(Modifier.height(36.dp))
+        Dividerr(text = "Or Login with")
+        Spacer(Modifier.height(24.dp))
         BottomContent(
             normaltext = "Don't have an account?",
-            clickabletext = "Sign up"
+            clickabletext = "Register Now"
         )
+        Spacer(Modifier.weight(1f))
+        BottomText(
+            normaltext = "Don't have an account?",
+            clickabletext = "Register Now"
+        )
+        Spacer(Modifier.height(28.dp))
     }
 }
