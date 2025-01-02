@@ -14,7 +14,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -43,7 +45,8 @@ import java.util.Date
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun NotificationScreen(
-    modifier: Modifier=Modifier
+    modifier: Modifier=Modifier,
+    onBackClicked:()->Unit = {}
 ){
     Scaffold(
         modifier = Modifier
@@ -67,7 +70,7 @@ fun NotificationScreen(
                    }
                },
                 navigationIcon = {
-                    IconButton(onClick = {}) {
+                    IconButton(onClick = onBackClicked) {
                         Icon(
                             imageVector = Icons.Filled.ArrowBack,
                             contentDescription = "Back",
@@ -80,7 +83,7 @@ fun NotificationScreen(
     ) {innerpadding->
         Column(
             modifier=modifier
-
+                .verticalScroll(rememberScrollState())
                 .fillMaxSize()
                 .padding(innerpadding)
                 .padding(horizontal = 15.dp)

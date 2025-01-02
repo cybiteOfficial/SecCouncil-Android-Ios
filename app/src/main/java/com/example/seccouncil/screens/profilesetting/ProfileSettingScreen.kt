@@ -9,7 +9,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,7 +29,8 @@ import com.example.seccouncil.common.TopAppBar
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun ProfileSettingScreen(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onBackClicked:()->Unit ={}
 ) {
     val profilescreensettingitemtitle: List<ProfileSettingItem> =
         listOf(
@@ -39,9 +42,12 @@ fun ProfileSettingScreen(
         )
     TopAppBar(
         title = "Profile",
+        onClick = onBackClicked,
         content = {
         Column(
-            modifier = modifier.fillMaxWidth(),
+            modifier = modifier
+                .fillMaxWidth()
+            ,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Box(

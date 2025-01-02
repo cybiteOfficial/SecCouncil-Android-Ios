@@ -42,8 +42,7 @@ fun ProfileScreenSettingItem(
     ) {
         Row(
             modifier = modifier
-                .fillMaxWidth()
-                .height(40.dp),
+                .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Image(

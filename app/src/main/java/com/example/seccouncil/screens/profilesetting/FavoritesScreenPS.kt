@@ -31,11 +31,12 @@ import com.example.seccouncil.common.TopAppBar
 @Composable
 fun FavoritesScreenPs(
     modifier: Modifier = Modifier,
+    onBackClicked:()->Unit ={}
 ){
     TopAppBar(
         modifier = Modifier,
         title = "Favorites",
-        onClick = {},
+        onClick = onBackClicked,
         content = { FavoritesScreenPsContent() }
     )
 }

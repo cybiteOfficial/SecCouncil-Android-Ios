@@ -2,6 +2,7 @@ package com.example.seccouncil.screens.homescreen
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,18 +17,22 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -49,9 +54,18 @@ import androidx.compose.ui.unit.sp
 import com.example.seccouncil.R
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun HomeScreen() {
+fun HomeScreen(
+    onHomeClicked:()->Unit = {},
+    onCourseClicked:()->Unit = {},
+    onCertificationClicked:()->Unit = {},
+    onProfileClicked:()->Unit = {},
+    onProfileSettingClicked: () -> Unit = {},
+    onBellClicked: () -> Unit = {},
+    onSearchClicked: () -> Unit={}
+) {
     val navItemList = listOf(
         NavItem("Home", icon = R.drawable.home), // Replace with your icons
         NavItem("Courses", icon = R.drawable.courses),
@@ -63,6 +77,17 @@ fun HomeScreen() {
     }
     Scaffold(
         modifier = Modifier.fillMaxSize(),
+        topBar = {
+            TopAppBar(
+                title = {
+                    TopContent(
+                        onBellClicked = onBellClicked,
+                        onProfileClicked = onProfileClicked,
+                        onSearchClicked = onSearchClicked
+                    )
+                }
+            )
+        },
         bottomBar = {
             NavigationBar {
                 navItemList.forEachIndexed { index, navItem ->
@@ -73,9 +98,15 @@ fun HomeScreen() {
                             Icon(
                                 painter = painterResource(id = navItem.icon),
                                 contentDescription = null,
-                                modifier = Modifier.size(
-                                    if (index != 0) 40.dp else 30.dp
-                                )
+                                modifier = Modifier.size(if (index != 0) 40.dp else 30.dp)
+                                    .clickable {
+                                        when(index){
+                                            0->onHomeClicked()
+                                            1->onCourseClicked()
+                                            2->onCertificationClicked()
+                                            3->onProfileSettingClicked()
+                                        }
+                                    }
                             )
                         },
                         label = {
@@ -92,21 +123,23 @@ fun HomeScreen() {
     ) { innerPadding ->
         ContentScreen(
             modifier = Modifier.padding(innerPadding),
-            selectedIndex = selectedIndex
+            onCourseClicked = onCourseClicked
         )
     }
 }
 
 @Composable
-fun ContentScreen(modifier: Modifier = Modifier, selectedIndex: Int) {
+fun ContentScreen(modifier: Modifier = Modifier,
+                  onCourseClicked: () -> Unit = {}
+) {
     Column(
         modifier = modifier
+            .verticalScroll(rememberScrollState())
             .fillMaxSize()
             .padding(horizontal = 15.dp)
         ,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        TopContent()
         Spacer(Modifier.height(25.dp))
         AdBanner()
         Spacer(Modifier.height(20.dp))
@@ -114,9 +147,13 @@ fun ContentScreen(modifier: Modifier = Modifier, selectedIndex: Int) {
             color = Color.Black
         )
         Spacer(Modifier.height(20.dp))
-        PopularCourses()
+        PopularCourses(
+            onCourseClicked = onCourseClicked
+        )
         Spacer(Modifier.height(15.dp))
-        TopRatedCourses()
+        TopRatedCourses(
+            onCourseClicked = onCourseClicked
+        )
         Spacer(Modifier.height(15.dp))
 
     }
@@ -124,7 +161,10 @@ fun ContentScreen(modifier: Modifier = Modifier, selectedIndex: Int) {
 
 @Composable
 private fun TopContent(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onProfileClicked:()->Unit = {},
+    onSearchClicked:()->Unit = {},
+    onBellClicked:()->Unit = {}
 ){
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -141,6 +181,10 @@ private fun TopContent(
                 contentDescription = "Profile Picture",
                 modifier = Modifier
                     .size(40.dp)
+                    .clickable {
+                        onProfileClicked()  // invoking req in lambda funciton not passing
+                    }
+
             )
             Spacer(modifier= Modifier.width(5.dp))
             Column(
@@ -172,6 +216,7 @@ private fun TopContent(
                 modifier = Modifier
                     .padding(end = 35.dp)
                     .size(30.dp)
+                    .clickable { onSearchClicked() }
 
 
             )
@@ -179,6 +224,7 @@ private fun TopContent(
                 imageVector = Icons.Default.Notifications,
                 contentDescription = "Notification",
                 modifier = Modifier.size(30.dp)
+                    .clickable { onBellClicked() }
 
             )
         }
@@ -236,13 +282,17 @@ private fun AdBanner(
 
 @Composable
 private fun PopularCourses(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onCourseClicked: () -> Unit = {}
 ){
     Column(
         modifier = Modifier.wrapContentSize()
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+
+            ,
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -264,9 +314,15 @@ private fun PopularCourses(
         Row(
             modifier = Modifier.fillMaxWidth()
         ) {
-            Course(Modifier.weight(1f), courseName = "Cyber Security \nBegineer")
+            Course(Modifier.weight(1f),
+                courseName = "Cyber Security \nBegineer",
+                onCourseClicked = onCourseClicked
+            )
             Spacer(Modifier.width(15.dp))
-            Course(Modifier.weight(1f), courseName = "Computer \nNetworking")
+            Course(Modifier.weight(1f),
+                courseName = "Computer \nNetworking",
+                onCourseClicked = onCourseClicked
+            )
         }
     }
 
@@ -275,7 +331,8 @@ private fun PopularCourses(
 
 @Composable
 private fun TopRatedCourses(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onCourseClicked: () -> Unit = {}
 ){
     Column(
         modifier = Modifier.wrapContentSize()
@@ -290,10 +347,16 @@ private fun TopRatedCourses(
         Row(
             modifier = Modifier.fillMaxWidth()
         ) {
-            Course(Modifier.weight(1f), courseName = "Cyber Security \nBegineer")
+            Course(
+                Modifier.weight(1f),
+                courseName = "Cyber Security \nBegineer",
+                onCourseClicked = onCourseClicked
+            )
             Spacer(Modifier.width(15.dp))
-            Course(Modifier.weight(1f), courseName = "Cyber Security \n" +
-                    "Begineer")
+            Course(Modifier.weight(1f),
+                courseName = "Cyber Security \n" +
+                    "Begineer",
+                onCourseClicked = onCourseClicked)
         }
     }
 
@@ -302,7 +365,8 @@ private fun TopRatedCourses(
 @Composable
 private fun Course(
     modifier: Modifier = Modifier,
-    courseName:String
+    courseName:String,
+    onCourseClicked:()->Unit = {}
 ){
     Box(
     modifier = modifier
@@ -325,6 +389,9 @@ private fun Course(
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .size(width = 175.dp, height = 118.dp)
+                    .clickable {
+                        onCourseClicked()
+                    }
             )
             Spacer(Modifier.height(5.dp))
             Text(
@@ -340,42 +407,56 @@ private fun Course(
     }
 }
 
+
+@Preview(showBackground = true)
 @Composable
 private fun CourseContent(
     modifier: Modifier = Modifier,
-    rating:String = "4.7",
-    no_of_students:String = "1,102" ,
-    madeBy:String = "Aadil Aariz",
-    subject:String = "Coding"
-){
-    Column() {
+    rating: String = "4.7",
+    no_of_students: String = "1,102",
+    madeBy: String = "Aadil Aariz",
+    subject: String = "Coding"
+) {
+    Column(
+        horizontalAlignment = Alignment.Start,
+        modifier = modifier
+    ) {
+        // First row: Rating | Students
         Row(
-            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically
-        ){
+        ) {
             Text(
-                text = "Rating ${rating}/5",
+                text = "Rating $rating/5",
                 color = colorResource(R.color.place_holder),
                 fontFamily = FontFamily.Serif,
                 fontSize = 12.sp
             )
             Spacer(Modifier.width(5.dp))
             VerticalDivider(
-                modifier=Modifier
-                .height(12.dp)
-                , thickness = 1.dp,
-                Color.DarkGray)
+                modifier = Modifier
+                    .height(12.dp),
+                thickness = 1.dp,
+                color = Color.DarkGray
+            )
             Spacer(Modifier.width(5.dp))
             Text(
-                text = "${no_of_students} Students",
+                text = "$no_of_students students",
                 color = colorResource(R.color.place_holder),
                 fontFamily = FontFamily.Serif,
                 fontSize = 12.sp
             )
         }
-        Row(
 
-        ){
+        Spacer(modifier = Modifier.height(5.dp))
+
+        // Second row: MadeBy | Subject
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Text(
                 text = "$madeBy",
                 color = colorResource(R.color.place_holder),
@@ -384,20 +465,18 @@ private fun CourseContent(
             )
             Spacer(Modifier.width(5.dp))
             VerticalDivider(
-                modifier=Modifier
-                    .height(12.dp)
-                , thickness = 1.dp,
-                Color.DarkGray)
+                modifier = Modifier
+                    .height(12.dp),
+                thickness = 1.dp,
+                color = Color.DarkGray
+            )
             Spacer(Modifier.width(5.dp))
             Text(
-                text = "${subject}",
+                text = "$subject",
                 color = colorResource(R.color.place_holder),
                 fontFamily = FontFamily.Serif,
                 fontSize = 12.sp
             )
         }
     }
-
 }
-
-

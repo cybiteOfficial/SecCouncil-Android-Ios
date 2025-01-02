@@ -1,6 +1,7 @@
 package com.example.seccouncil.screens
 
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -28,6 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.colorResource
@@ -44,7 +46,8 @@ import com.example.seccouncil.R
 @Preview(showBackground = true)
 @Composable
 fun SearchScreen(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onBackClicked:()->Unit ={}
 ){
     Column(
         modifier = modifier
@@ -61,7 +64,10 @@ fun SearchScreen(
         ) {
             Icon(
                 imageVector = Icons.Default.ArrowBack,
-                contentDescription = "Back"
+                contentDescription = "Back",
+                modifier = Modifier.clickable {
+                    onBackClicked
+                }
             )
             Spacer(modifier = Modifier.weight(1f))
             SearchField(

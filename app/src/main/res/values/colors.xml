@@ -9,8 +9,10 @@
     <color name="white">#FFFFFFFF</color>
     <color name="button_color">#38B6FF</color>
     <color name="place_holder">#80000000</color>
-    <color name="edit_box_background">#E3E3E4</color>
+    <color name="edit_box_background">#E8ECF4</color> //E8ECF4 //E3E3E4
     <color name="image_background">#E4E2E2</color>  // #F7F7F8
     <color name="markallasread">#00488D</color>
     <color name="starcolor">#FFBF66</color>
+    <color name="forgetPassword">#6A707C</color>
+    <color name="bodyText">#8391A1</color>
 </resources>

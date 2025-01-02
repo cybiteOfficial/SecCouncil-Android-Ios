@@ -33,11 +33,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.seccouncil.R
+import com.example.seccouncil.common.BottomContent
+import com.example.seccouncil.common.Dividerr
 
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun PasswordScreen(){
+fun PasswordScreen(
+    onLoginClicked:()->Unit = {}
+){
     Column(
         modifier = Modifier
             .safeDrawingPadding()
@@ -68,14 +72,18 @@ fun PasswordScreen(){
                 disabledContainerColor = colorResource(R.color.white)
             )
         ){
-            PasswordScreenContent()
+            PasswordScreenContent(
+                onLoginClicked = onLoginClicked
+            )
         }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PasswordScreenContent(){
+fun PasswordScreenContent(
+    onLoginClicked:()->Unit = {}
+){
     Text(
         text = "Password",
         fontStyle = FontStyle.Normal,
@@ -91,7 +99,7 @@ fun PasswordScreenContent(){
         InputField(placeHolderText = "Enter Password", imeAction = ImeAction.Done)
         Spacer(Modifier.height(45.dp))
         Button(
-            onClick = {},
+            onClick =  onLoginClicked,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(start = 15.dp, end = 15.dp)

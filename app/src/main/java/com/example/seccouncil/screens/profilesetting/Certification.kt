@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,11 +28,13 @@ import com.example.seccouncil.common.TopAppBar
 
 @Preview(showSystemUi= true)
 @Composable
-fun Certification(){
+fun Certification(
+    onBackClicked:()->Unit ={}
+){
     TopAppBar(
         title = "Certification",
         modifier = Modifier,
-        onClick = {}
+        onClick = onBackClicked
         ,
         content = {
                Column(
@@ -46,6 +49,8 @@ fun Certification(){
         }
     )
 }
+
+
 @Composable
 private fun CertificationItem(
     modifier: Modifier = Modifier
@@ -64,7 +69,7 @@ private fun CertificationItem(
             modifier = Modifier.align(Alignment.Center)
         )
         Icon(
-            painter = painterResource(R.drawable.download),
+           painter = painterResource(R.drawable.download2),
             contentDescription = "Download Certificate",
             modifier = Modifier.size(32.dp)
                 .align(Alignment.BottomEnd)

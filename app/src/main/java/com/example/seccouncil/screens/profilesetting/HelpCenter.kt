@@ -12,11 +12,14 @@ import com.example.seccouncil.common.TopAppBar
 
 @Preview(showSystemUi = true)
 @Composable
-fun HelpCenter(){
+fun HelpCenter(
+    onBackClicked:()->Unit ={}
+){
     TopAppBar(
         title = "Help Center",
         modifier = Modifier,
-        content = { HelpCenterScreen() }
+        content = { HelpCenterScreen() },
+        onClick = onBackClicked
     )
 }
 

@@ -45,7 +45,9 @@ import com.example.seccouncil.R
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PaymentScreen(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onBackClicked:()->Unit = {}
+
 ){
     val options = listOf("Paypal", "Paytm", "Google Pay","Other methods")
     val img = listOf(R.drawable.paypal,R.drawable.paytm,R.drawable.google_pay,R.drawable.card_payment)
@@ -83,7 +85,7 @@ fun PaymentScreen(
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = {}) {
+                    IconButton(onClick = onBackClicked) {
                         Icon(
                             imageVector = Icons.Filled.ArrowBack,
                             contentDescription = "Back",

@@ -67,5 +67,15 @@ dependencies {
     // Splash Screen Api
     implementation("androidx.core:core-splashscreen:1.0.0")
 
+    // Navigation
+    val nav_version = "2.8.5"
+    implementation("androidx.navigation:navigation-compose:$nav_version")
+
+    // Retrofit for API requests
+    implementation (libs.retrofit2.retrofit)
+    implementation (libs.converter.gson)
+    // ViewModel and LiveData for MVVM architecture
+    implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
+    implementation ("androidx.lifecycle:lifecycle-livedata:2.8.7")
 
 }

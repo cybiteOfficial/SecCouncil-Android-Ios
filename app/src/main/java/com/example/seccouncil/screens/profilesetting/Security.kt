@@ -16,11 +16,14 @@ import com.example.seccouncil.common.TopAppBar
 
 @Preview(showSystemUi = true)
 @Composable
-fun Security(){
+fun Security(
+    onBackClicked:()->Unit ={}
+){
         TopAppBar(
             title = "Security",
             modifier = Modifier,
-            content = { SecurityScreen() }
+            content = { SecurityScreen() },
+            onClick = onBackClicked
         )
 }
 

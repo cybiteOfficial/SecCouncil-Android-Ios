@@ -1,6 +1,5 @@
 package com.example.seccouncil.screens.profilesetting
 
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -13,14 +12,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -44,7 +40,14 @@ import com.example.seccouncil.common.ProfileScreenItem
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun ProfileScreen(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onProfileClicked:()->Unit = {},
+    onSecurityClicked:()->Unit = {},
+    onCertificationsClicked:()->Unit = {},
+    onHelpCenterClicked:()->Unit = {},
+    onFavouritesClicked:()->Unit = {},
+    onBackClicked:()->Unit = {}
+
 ){
     val profileOptions = listOf("Profile","Favorites",
         "Security","Certifications",
@@ -80,7 +83,7 @@ fun ProfileScreen(
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = {}) {
+                    IconButton(onClick = onBackClicked) {
                         Icon(
                             imageVector = Icons.Filled.ArrowBack,
                             contentDescription = "Back",
@@ -136,7 +139,16 @@ fun ProfileScreen(
                 index,profileoption->
                 ProfileScreenItem(
                     image = iconOptions[index],
-                    title = profileoption
+                    title = profileoption,
+                    onClicked = {
+                        when(index){
+                            0->onProfileClicked()
+                            1->onFavouritesClicked()
+                            2->onSecurityClicked()
+                            3->onCertificationsClicked()
+                            5->onHelpCenterClicked()
+                        }
+                    }
                 )
             }
         }

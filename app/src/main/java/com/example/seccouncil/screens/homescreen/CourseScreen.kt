@@ -24,6 +24,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
@@ -62,14 +63,13 @@ import kotlin.text.append
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun CourseScreen(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onEnrollClicked:()->Unit = {},
+    onBackClicked:()->Unit = {}
 ){
     var isFavorited by remember {
         mutableStateOf(false)
     }
-
-
-
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -84,9 +84,12 @@ fun CourseScreen(
             verticalAlignment = Alignment.CenterVertically
         ){
             Icon(
-                imageVector = Icons.Default.ArrowBack,
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                 contentDescription = "Back",
                 modifier = Modifier.size(32.dp)
+                    .clickable {
+                            onBackClicked()
+                    }
             )
             Spacer(modifier = Modifier.weight(1f))
             Icon(
@@ -126,7 +129,9 @@ fun CourseScreen(
         Spacer(modifier=Modifier.height(5.dp))
         TabScreen()
         Spacer(modifier.height(3.dp))
-        CourseEnroll()
+        CourseEnroll(
+            onEnrollClicked = onEnrollClicked
+        )
 
     }
 }
@@ -461,10 +466,11 @@ fun ReviewsSection(
 @Preview(showBackground = true)
 @Composable
 private fun CourseEnroll(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onEnrollClicked:()->Unit = {}
 ){
     Button(
-        onClick = {},
+        onClick = onEnrollClicked,
         modifier = Modifier
             .fillMaxWidth()
             .height(50.dp),

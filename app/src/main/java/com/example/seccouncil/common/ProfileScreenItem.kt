@@ -2,6 +2,7 @@ package com.example.seccouncil.common
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -34,7 +35,8 @@ fun ProfileScreenItem(
     @DrawableRes image:Int = R.drawable.profile,
     title:String = "Profile",
     fontWeight: FontWeight = FontWeight.Black,
-    color: Color = Color.Unspecified
+    color: Color = Color.Unspecified,
+    onClicked:()->Unit = {}
 ){
     Column(
         modifier = modifier
@@ -43,6 +45,7 @@ fun ProfileScreenItem(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .clickable { onClicked() }
                 .height(35.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
