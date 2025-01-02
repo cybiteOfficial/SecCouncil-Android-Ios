@@ -1,8 +1,10 @@
 package com.example.seccouncil.screens
 
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -27,13 +29,21 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -43,69 +53,63 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.seccouncil.R
+import com.example.seccouncil.common.BottomContent
+import com.example.seccouncil.common.BottomText
+import com.example.seccouncil.common.Dividerr
+import com.example.seccouncil.ui.theme.urbanist
 
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun Otp(){
+fun Otp(
+    onVerifyClicked:()->Unit = {}
+){
     Column(
         modifier = Modifier
             .safeDrawingPadding()
             .navigationBarsPadding()
     ){
-        Card(
-            modifier = Modifier.fillMaxWidth()
-                .clip(RoundedCornerShape(bottomStart = 0.dp, bottomEnd = 0.dp))
-        ) {
-            Image(
-                painter = painterResource(R.drawable.seec_1),
-                contentDescription = null,
-                modifier = Modifier.background(color = colorResource(R.color.image_background))
-                    .fillMaxWidth(),
-                contentScale = ContentScale.Crop
-            )
-        }
-        // placing bottom card into top of top card
-        Card(
-            modifier = Modifier
-                .fillMaxSize()
-                .offset(y = (-20).dp) // Adjust the vertical position to overlap the first card
-                .clip(RoundedCornerShape(20.dp)),
-            colors = CardDefaults.cardColors(
-                containerColor = colorResource(R.color.white),
-                contentColor = colorResource(R.color.black),
-                disabledContentColor = colorResource(R.color.black),
-                disabledContainerColor = colorResource(R.color.white)
-            )
-        ){
-            OtpContent()
-        }
+        OtpContent(onVerifyClicked = onVerifyClicked)
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OtpContent(){
-    Text(
-        text = "OTP",
-        fontStyle = FontStyle.Normal,
-        fontWeight = FontWeight.ExtraBold,
-        fontFamily = FontFamily.Serif,
-        fontSize = 25.sp,
-        modifier = Modifier.padding(start = 15.dp, top = 30.dp)
-    )
-    Spacer(modifier = Modifier.height(20.dp))
+fun OtpContent(
+    onVerifyClicked:()->Unit = {}
+){
+    Column(
+        modifier = Modifier.fillMaxWidth()
+            .padding(horizontal = 15.dp)
+    ) {
+        Text(
+            text = "OTP Verification",
+            style = TextStyle(
+                fontSize = 32.sp,
+                fontFamily = urbanist,
+                fontWeight = FontWeight.Bold
+            ),
+            modifier = Modifier
+                .padding(top = 80.dp)
+        )
+        Spacer(Modifier.height(8.dp))
+        Text(
+            text = "Enter the verification code we just sent on your \nemail address",
+            style = TextStyle(
+                fontFamily = urbanist,
+                fontWeight = FontWeight.Medium,
+                fontSize = 16.sp,
+                lineHeight = 24.sp,
+            ),
+            color = colorResource(R.color.forgetPassword)
+        )
+    }
+    Spacer(modifier = Modifier.height(32.dp))
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            "Enter OTP",
-            fontFamily = FontFamily.Monospace,
-            color = colorResource(R.color.place_holder)
-        )
-        Spacer(Modifier.height(10.dp))
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -117,9 +121,9 @@ fun OtpContent(){
             OtpBox(imeAction = ImeAction.Next)
             OtpBox(imeAction = ImeAction.Done)
         }
-        Spacer(Modifier.height(45.dp))
+        Spacer(Modifier.height(40.dp))
         Button(
-            onClick = {},
+            onClick = onVerifyClicked,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(start = 15.dp, end = 15.dp)
@@ -127,41 +131,68 @@ fun OtpContent(){
             shape = RoundedCornerShape(10.dp) // To Clip the Corner of the Button
             ,
             colors = ButtonColors(
-                containerColor = colorResource(R.color.button_color),
-                disabledContainerColor = colorResource(R.color.button_color),
-                contentColor = Color.Black,
-                disabledContentColor = Color.Black
+                containerColor = Color.Black,
+                disabledContainerColor = Color.Black,
+                contentColor = Color.White,
+                disabledContentColor = Color.White
             )
 
         ) {
             Text(
-                text = "Log in",
-                fontFamily = FontFamily.Monospace,
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp
+                text = "Verify",
+                fontFamily = FontFamily.Serif,
+                fontWeight = FontWeight.Medium,
+                fontSize = 16.sp
             )
         }
         Spacer(Modifier.height(35.dp))
         Dividerr()
         Spacer(Modifier.height(25.dp))
-        BottomContent(
+        BottomContent()
+        Spacer(Modifier.weight(1f))
+        BottomText(
             normaltext = "Didn't receive OTP?",
-            clickabletext = "Resend"
+            clickabletext = "Resend",
+            onClick = {}
         )
+        Spacer(Modifier.height(28.dp))
     }
 }
 
 @Composable
 fun OtpBox(
     modifier: Modifier = Modifier,
-    imeAction: ImeAction
-){
+    imeAction: ImeAction,
+    otpValue: String = "",
+    onOtpValueChange: (String) -> Unit = {"1"}
+) {
+    var isFocused by remember { mutableStateOf(false) }
+
     TextField(
-        value = "",
-        onValueChange = {},
-        modifier = Modifier
-            .size(50.dp)
-            .clip(RoundedCornerShape(10.dp)),
+        value = otpValue,
+        onValueChange = onOtpValueChange,
+        modifier = modifier
+            .size(width = 70.dp, height = 60.dp)
+            .clip(RoundedCornerShape(10.dp))
+            .onFocusChanged { focusState ->
+                isFocused = focusState.isFocused
+            }
+            .border(
+                BorderStroke(
+                    width = 2.dp,
+                    brush = if (isFocused || otpValue.isNotEmpty()) {
+                        Brush.linearGradient(
+                            colors = listOf(
+                                Color(0xFF39B6FF), // Start color
+                                Color(0xFF5271FF)  // End color
+                            )
+                        )
+                    } else {
+                        SolidColor(colorResource(R.color.edit_box_background))
+                    }
+                ),
+                shape = RoundedCornerShape(10.dp)
+            ),
         colors = TextFieldDefaults.colors(
             focusedContainerColor = colorResource(R.color.edit_box_background),
             unfocusedContainerColor = colorResource(R.color.edit_box_background),
@@ -171,7 +202,7 @@ fun OtpBox(
             disabledIndicatorColor = Color.Transparent
         ),
         keyboardOptions = KeyboardOptions.Default.copy(
-            keyboardType = KeyboardType.Text,
+            keyboardType = KeyboardType.Number,
             imeAction = imeAction
         )
     )
