@@ -1,58 +1,44 @@
 package com.example.seccouncil.screens
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxColors
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.seccouncil.R
 import com.example.seccouncil.common.BottomContent
 import com.example.seccouncil.common.BottomText
@@ -63,68 +49,146 @@ import com.example.seccouncil.ui.theme.urbanist
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun SignUp(
-    onLoginClick:()->Unit = {}
-){
-   Column(
-    modifier = Modifier
-        .fillMaxSize()
-        .navigationBarsPadding()
-        .statusBarsPadding()
-        .verticalScroll(state=rememberScrollState())
-   ){
-       SignUpContent()
-       BottomContent()
-       Spacer(Modifier.weight(1f))
-       BottomText(
-           normaltext = "Already have an account?",
-           clickabletext = "Login Now",
-           onClick = onLoginClick
-       )
-       Spacer(Modifier.height(28.dp))
-       }
-   }
+    onClickToOTP:()->Unit={},
+    authViewModel: SignUpViewModel = viewModel()
+) {
+    val username by authViewModel.username
+    val email by authViewModel.email
+    val password by authViewModel.password
+    val confirmPassword by authViewModel.confirmPassword
+    val errorMessage by authViewModel.errorMessage
+    val navigateToOtpScreen by authViewModel.navigateToOtpScreen
 
-@OptIn(ExperimentalMaterial3Api::class)
+    if (navigateToOtpScreen) {
+        onClickToOTP()
+        authViewModel.navigateToOtpScreen.value = false // Reset navigation state
+    }
+
+    Box(
+        modifier = Modifier.fillMaxSize()
+    ){
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .navigationBarsPadding()
+                .statusBarsPadding()
+                .verticalScroll(state = rememberScrollState())
+                .align(Alignment.TopStart)
+            ,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            SignUpContent(
+                authViewModel = authViewModel,
+                username = username,
+                email = email,
+                password = password,
+                confirmPassword = confirmPassword,
+                onUsernameChange = {authViewModel.onUsernameChange(it)},
+                onEmailChange = {authViewModel.onEmailChange(it)},
+                onPasswordChange = {authViewModel.onPasswordChange(it)},
+                onConfirmPasswordChange = {authViewModel.onConfirmPasswordChange(it)},
+                onRegisterClick = {authViewModel.senDOtp()}
+            )
+
+            BottomContent()
+            if (errorMessage.isNotEmpty()) {
+                Text(
+                    text = errorMessage,
+                    fontSize = 12.sp,
+                    color = Color.Red
+                )
+            }
+
+            Spacer(Modifier.weight(1f))
+            BottomText(
+                normaltext = "Already have an account?",
+                clickabletext = "Login Now",
+                onClick = {}
+            )
+            Spacer(Modifier.height(28.dp))
+        }
+        if (authViewModel.isLoading.value) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                CircularProgressIndicator(color = Color.Black)
+            }
+        }
+    }
+}
+
 @Composable
 fun SignUpContent(
-    onLoginClick: () -> Unit = {}
-){
+    authViewModel: SignUpViewModel,
+    username: String,
+    email: String,
+    password: String,
+    confirmPassword: String,
+    onUsernameChange: (String) -> Unit,
+    onEmailChange: (String) -> Unit,
+    onPasswordChange: (String) -> Unit,
+    onConfirmPasswordChange: (String) -> Unit,
+    onRegisterClick: () -> Unit
+) {
         Column(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxWidth()
         ) {
             Text(
                 text = "Hello! Register to get\nstarted",
                 style = TextStyle(
                     fontSize = 32.sp,
-                    fontFamily = urbanist,
+                    fontFamily = FontFamily.SansSerif,
                     fontWeight = FontWeight.Bold
                 ),
                 modifier = Modifier
                     .padding(start = 15.dp, top = 80.dp)
             )
             Spacer(modifier = Modifier.height(32.dp))
-            InputField(placeHolderText = "Username", imeAction = ImeAction.Next)
+            InputField(
+                placeHolderText = "Username",
+                imeAction = ImeAction.Next,
+                value = username,
+                onValueChange = onUsernameChange
+            )
             Spacer(Modifier.height(12.dp))
-            InputField(placeHolderText = "Email", imeAction = ImeAction.Next)
+            InputField(
+                placeHolderText = "Email",
+                imeAction = ImeAction.Next,
+                value = email,
+                onValueChange = onEmailChange
+            )
             Spacer(Modifier.height(12.dp))
-            InputField(placeHolderText = "Password", imeAction = ImeAction.Next)
+            InputField(
+                placeHolderText = "Password",
+                imeAction = ImeAction.Next,
+                value = password,
+                onValueChange = onPasswordChange
+            )
             Spacer(Modifier.height(12.dp))
-            InputField(placeHolderText = "Confirm password", imeAction = ImeAction.Done)
+            InputField(
+                placeHolderText = "Confirm password",
+                imeAction = ImeAction.Done,
+                value = confirmPassword,
+                onValueChange = onConfirmPasswordChange
+            )
             Spacer(Modifier.height(30.dp))
             Button(
-                onClick = {},
+                onClick = onRegisterClick,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(start = 15.dp, end = 15.dp)
                     .height(50.dp),
-                shape = RoundedCornerShape(10.dp) // To Clip the Corner of the Button
-                ,
+                shape = RoundedCornerShape(10.dp),
                 colors = ButtonColors(
                     containerColor = Color.Black,
                     disabledContainerColor = Color.Black,
                     contentColor = Color.White,
                     disabledContentColor = Color.White
-                )
+                ),
+                enabled = !authViewModel.isLoading.value
             ) {
                 Text(
                     text = "Register",
@@ -137,8 +201,7 @@ fun SignUpContent(
             Dividerr()
             Spacer(Modifier.height(16.dp))
         }
-
-    }
+}
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -147,13 +210,15 @@ fun InputField(
     placeHolderText:String,
     imeAction: ImeAction,
     modifier: Modifier = Modifier,
-    containerColor: Color = colorResource(R.color.edit_box_background)
+    containerColor: Color = colorResource(R.color.edit_box_background),
+    value:String = "",
+    onValueChange:(String)->Unit = {""}
 ){
     TextField(
-        value = "",
-        onValueChange = {},
-        modifier = Modifier.fillMaxWidth()
-            .padding(start = 15.dp, end = 15.dp)
+        value = value,
+        onValueChange = onValueChange,
+        modifier = Modifier.fillMaxWidth(0.99f)
+            .padding(start = 25.dp, end = 15.dp)
             .clip(RoundedCornerShape(10.dp)),
         colors = TextFieldDefaults.colors(
             focusedContainerColor = containerColor,
@@ -171,8 +236,7 @@ fun InputField(
             text = placeHolderText,
             fontFamily = FontFamily.SansSerif,
             fontWeight = FontWeight.Normal,
-            color = colorResource(R.color.place_holder),
-            modifier = Modifier.padding(start = 15.dp)
+            color = colorResource(R.color.place_holder)
         ) }
     )
 }

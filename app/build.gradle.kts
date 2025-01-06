@@ -74,6 +74,8 @@ dependencies {
     // Retrofit for API requests
     implementation (libs.retrofit2.retrofit)
     implementation (libs.converter.gson)
+
+
     // ViewModel and LiveData for MVVM architecture
     implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
     implementation ("androidx.lifecycle:lifecycle-livedata:2.8.7")
