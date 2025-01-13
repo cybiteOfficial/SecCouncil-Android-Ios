@@ -4,11 +4,13 @@ import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
@@ -36,6 +38,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -50,14 +53,16 @@ import com.example.seccouncil.ui.theme.urbanist
 @Composable
 fun SignUp(
     onClickToOTP:()->Unit={},
-    authViewModel: SignUpViewModel = viewModel()
+    authViewModel: SignUpViewModel = viewModel(),
+    onLoginClicked:()->Unit = {}
 ) {
-    val username by authViewModel.username
     val email by authViewModel.email
     val password by authViewModel.password
     val confirmPassword by authViewModel.confirmPassword
     val errorMessage by authViewModel.errorMessage
     val navigateToOtpScreen by authViewModel.navigateToOtpScreen
+    val firstname by authViewModel.firstname
+    val lastname by authViewModel.lastname
 
     if (navigateToOtpScreen) {
         onClickToOTP()
@@ -79,11 +84,13 @@ fun SignUp(
         ) {
             SignUpContent(
                 authViewModel = authViewModel,
-                username = username,
                 email = email,
                 password = password,
+                firstname = firstname,
+                lastname = lastname,
+                onFirstnameChange = {authViewModel.onFirstnameChange(it)},
+                onLastnameChange = {authViewModel.onLastnameChange(it)},
                 confirmPassword = confirmPassword,
-                onUsernameChange = {authViewModel.onUsernameChange(it)},
                 onEmailChange = {authViewModel.onEmailChange(it)},
                 onPasswordChange = {authViewModel.onPasswordChange(it)},
                 onConfirmPasswordChange = {authViewModel.onConfirmPasswordChange(it)},
@@ -98,12 +105,11 @@ fun SignUp(
                     color = Color.Red
                 )
             }
-
             Spacer(Modifier.weight(1f))
             BottomText(
                 normaltext = "Already have an account?",
                 clickabletext = "Login Now",
-                onClick = {}
+                onClick = onLoginClicked
             )
             Spacer(Modifier.height(28.dp))
         }
@@ -122,15 +128,17 @@ fun SignUp(
 @Composable
 fun SignUpContent(
     authViewModel: SignUpViewModel,
-    username: String,
     email: String,
     password: String,
     confirmPassword: String,
-    onUsernameChange: (String) -> Unit,
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
     onConfirmPasswordChange: (String) -> Unit,
-    onRegisterClick: () -> Unit
+    onRegisterClick: () -> Unit,
+    firstname:String,
+    lastname:String,
+    onFirstnameChange:(String)->Unit,
+    onLastnameChange:(String)->Unit
 ) {
         Column(
             modifier = Modifier
@@ -147,12 +155,31 @@ fun SignUpContent(
                     .padding(start = 15.dp, top = 80.dp)
             )
             Spacer(modifier = Modifier.height(32.dp))
-            InputField(
-                placeHolderText = "Username",
-                imeAction = ImeAction.Next,
-                value = username,
-                onValueChange = onUsernameChange
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth()
+                    .padding(start = 25.dp, end = 15.dp),
+                horizontalArrangement = Arrangement.spacedBy(15.dp)
+            ){
+                InputField(
+                    placeHolderText = "First name",
+                    modifier = Modifier.weight(1f),
+                    imeAction = ImeAction.Next,
+                    value = firstname,
+                    onValueChange = onFirstnameChange,
+                    endPadding = 0.dp,
+                    startPadding = 0.dp
+                )
+                InputField(
+                    placeHolderText = "Last name",
+                    modifier = Modifier.weight(1f),
+                    imeAction = ImeAction.Next,
+                    value = lastname,
+                    onValueChange = onLastnameChange,
+                    endPadding =4.dp,
+                    startPadding = 0.dp
+                )
+            }
+
             Spacer(Modifier.height(12.dp))
             InputField(
                 placeHolderText = "Email",
@@ -212,13 +239,15 @@ fun InputField(
     modifier: Modifier = Modifier,
     containerColor: Color = colorResource(R.color.edit_box_background),
     value:String = "",
-    onValueChange:(String)->Unit = {""}
+    onValueChange:(String)->Unit = {""},
+    startPadding: Dp = 25.dp,
+    endPadding: Dp = 15.dp
 ){
     TextField(
         value = value,
         onValueChange = onValueChange,
-        modifier = Modifier.fillMaxWidth(0.99f)
-            .padding(start = 25.dp, end = 15.dp)
+        modifier = modifier.fillMaxWidth(0.99f)
+            .padding(start = startPadding, end = endPadding)
             .clip(RoundedCornerShape(10.dp)),
         colors = TextFieldDefaults.colors(
             focusedContainerColor = containerColor,
@@ -240,9 +269,5 @@ fun InputField(
         ) }
     )
 }
-
-
-
-
 
 
