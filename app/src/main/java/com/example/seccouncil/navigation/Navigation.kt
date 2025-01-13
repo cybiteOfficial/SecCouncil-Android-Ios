@@ -1,15 +1,11 @@
 package com.example.seccouncil.navigation
 
-import android.widget.Toast
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.seccouncil.screens.Login
 import com.example.seccouncil.screens.NotificationScreen
@@ -18,6 +14,7 @@ import com.example.seccouncil.screens.PasswordScreen
 import com.example.seccouncil.screens.SearchScreen
 import com.example.seccouncil.screens.SignUp
 import com.example.seccouncil.screens.SignUpViewModel
+import com.example.seccouncil.screens.SplashScreen
 import com.example.seccouncil.screens.homescreen.CourseScreen
 import com.example.seccouncil.screens.homescreen.HomeScreen
 import com.example.seccouncil.screens.payment.PaymentScreen
@@ -37,18 +34,26 @@ fun Navigation(
 
     NavHost(
         navController = navController,
-        startDestination = Routes.Signup.name,
+        startDestination = Routes.Splash.name, // Start with Splash Screen
         modifier = Modifier
-    ){
+    ) {
+        composable(
+            route = Routes.Splash.name
+        ) {
+            SplashScreen {
+                navController.navigate(Routes.Signup.name) {
+                    popUpTo(Routes.Splash.name) { inclusive = true } // Remove Splash from backstack
+                }
+            }
+        }
         composable(
             route = Routes.Signup.name
-        ){
+        ) {
             SignUp(
-                onClickToOTP =
-                {navController.navigate(Routes.Otp.name)},
-                authViewModel = authViewModel
+                onClickToOTP = { navController.navigate(Routes.Otp.name) },
+                authViewModel = authViewModel,
+                onLoginClicked = { navController.navigate(Routes.Login.name) }
             )
-
         }
         composable(
             route = Routes.Login.name
@@ -56,7 +61,8 @@ fun Navigation(
             Login(
                 onLoginClicked = {
                     navController.navigate(Routes.Home.name)
-                }
+                },
+                onRegisterClick = {navController.navigate(Routes.Signup.name)}
             )
         }
         composable(
