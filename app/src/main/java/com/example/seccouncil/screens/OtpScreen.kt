@@ -75,13 +75,14 @@ fun Otp(
     LaunchedEffect(key1 = validOtp) {
         if (validOtp) {
             onVerifyClicked()
-            authViewModel.validOtp.value = false
+//            authViewModel.validOtp.value = false
         }
     }
 
-    BackHandler(enabled = true) {
-        authViewModel.setShouldCloseApp(true)
-    }
+//    BackHandler(enabled = true) {
+//        authViewModel.setShouldCloseApp(true)
+//    }
+    // BackHandler to close the app
     val activity = (LocalContext.current as? Activity)
     BackHandler(enabled = true) {
         activity?.finish()
