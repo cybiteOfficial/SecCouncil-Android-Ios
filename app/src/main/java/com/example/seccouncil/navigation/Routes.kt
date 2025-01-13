@@ -15,5 +15,6 @@ enum class Routes {
     Favourites,
     Security,
     HelpCenter,
-    Certification
+    Certification,
+    Splash
 }
