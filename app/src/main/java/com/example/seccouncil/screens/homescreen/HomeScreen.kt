@@ -1,5 +1,6 @@
 package com.example.seccouncil.screens.homescreen
 
+import android.text.BoringLayout
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -16,19 +17,26 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
@@ -44,7 +52,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.LinearGradientShader
+import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -56,6 +67,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.seccouncil.R
+import com.example.seccouncil.common.EnrolledContent
+import com.example.seccouncil.common.LinearProgressBarWithCircle
+import com.example.seccouncil.common.LinearProgressBarWithCirclePreview
+import com.example.seccouncil.common.RatingContent
+import com.example.seccouncil.common.TextComm
+import com.example.seccouncil.common.ViewAllTitle
 import com.example.seccouncil.ui.theme.urbanist
 
 
@@ -146,7 +163,8 @@ fun HomeScreen(
 
 @Composable
 fun ContentScreen(modifier: Modifier = Modifier,
-                  onCourseClicked: () -> Unit = {}
+                  onCourseClicked: () -> Unit = {},
+                  enrolled:Boolean = true
 ) {
     Column(
         modifier = modifier
@@ -160,13 +178,22 @@ fun ContentScreen(modifier: Modifier = Modifier,
         Spacer(Modifier.height(20.dp))
         AdBanner()
         Spacer(Modifier.height(20.dp))
+        if(enrolled){
+           ViewAllTitle(title = "Ongoing Courses")
+            Spacer(Modifier.height(8.dp))
+            OnGoingCourses()
+            Spacer(Modifier.height(16.dp))
+        }
+        ViewAllTitle(title = "Popular Courses")
+        Spacer(Modifier.height(16.dp))
         PopularCourses(
             onCourseClicked = onCourseClicked
         )
         Spacer(Modifier.height(20.dp))
-        PopularCourses(title = "Explore Courses")
+        ViewAllTitle(title = "Explore Courses")
+        Spacer(Modifier.height(16.dp))
+        PopularCourses()
         Spacer(Modifier.height(15.dp))
-
     }
 }
 
@@ -279,8 +306,66 @@ private fun AdBanner(
 }
 
 @Composable
+private fun OnGoingCourses(
+    modifier: Modifier = Modifier,
+    title: String = "Cyber Security Beginner",
+    description:String = "Explore Cybersecurity courses that focus on skills like threat detection, network security, and ...",
+    videosLeft:Int = 9
+){
+
+    Card(
+        modifier = modifier.wrapContentWidth()
+            .clip(RoundedCornerShape(5.dp))
+            .background(
+                Brush.linearGradient(
+                    colors = listOf(Color(0xFF4776E6), Color(0xFF20408B)),
+                    start = Offset(0f,0f),
+                    end = Offset(100f,1100f)
+                ),
+            ),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent,
+            contentColor = Color.White)
+
+    ){
+        Column(
+            modifier = Modifier.fillMaxWidth()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.Start
+        ) {
+            TextComm(
+                text = title,
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp
+            )
+            Spacer(Modifier.height(12.dp))
+            TextComm(
+                text = description,
+                fontSize = 12.sp
+            )
+            Spacer(Modifier.height(8.dp))
+            RatingContent()
+            Spacer(Modifier.height(8.dp))
+            EnrolledContent()
+            Spacer(Modifier.height(8.dp))
+            LinearProgressBarWithCircle(finished = 5, total = 14)
+            Spacer(Modifier.height(2.dp))
+            Text(
+                text = "$videosLeft videos left",
+                color = Color.LightGray,
+                fontSize = 12.sp,
+                fontFamily = urbanist,
+                modifier = Modifier
+                    .padding(start = 247.dp)
+            )
+
+
+        }
+
+    }
+}
+
+@Composable
 private fun PopularCourses(
-    title:String = "Popular Courses",
     modifier: Modifier = Modifier,
     onCourseClicked: () -> Unit = {}
 ){
@@ -288,39 +373,14 @@ private fun PopularCourses(
         modifier = Modifier.wrapContentSize()
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-
-            ,
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = title,
-                style = TextStyle(
-                    fontSize = 16.sp,
-                    fontFamily = urbanist,
-                    fontWeight = FontWeight.Bold
-                )
-            )
-            Text(
-                text = "View all",
-                color = Color.Gray,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold,
-                fontFamily = FontFamily.Monospace
-            )
-        }
-        Spacer(Modifier.height(16.dp))
-        Row(
             modifier = Modifier.fillMaxWidth()
         ) {
-            Course(Modifier.weight(1f),
+            Course(
                 courseName = "Cyber Security",
                 onCourseClicked = onCourseClicked
             )
-            Spacer(Modifier.width(15.dp))
-            Course(Modifier.weight(1f),
+            Spacer(Modifier.weight(1f))
+            Course(
                 courseName = "Computer Networking",
                 onCourseClicked = onCourseClicked
             )
@@ -353,7 +413,7 @@ private fun TopRatedCourses(
                 courseName = "Cyber Security \nBegineer",
                 onCourseClicked = onCourseClicked
             )
-            Spacer(Modifier.width(15.dp))
+            Spacer(Modifier.weight(1f))
             Course(Modifier.weight(1f),
                 courseName = "Cyber Security \n" +
                     "Begineer",
@@ -371,18 +431,14 @@ private fun Course(
 ){
     Box(
     modifier = modifier
-        .border(
-            0.5.dp,
-            Color.White,
-            RoundedCornerShape(8.dp)
-        ) // Add a border with rounded corners
-        .clip(RoundedCornerShape(16.dp)), // Clip the content to the rounded border
+        .wrapContentWidth()
+         // Add a border with rounded corners
+        , // Clip the content to the rounded border
         contentAlignment = Alignment.TopStart
     ) {
         Column(
             modifier = Modifier
-                .wrapContentSize()
-                .padding(5.dp)
+                .wrapContentHeight()
         ) {
             Image(
                 painter = painterResource(R.drawable.c0),
