@@ -2,9 +2,9 @@
 <resources>
 
     <style name="Theme.SecCouncil.Splash" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">@color/white</item>
-        <item name="android:windowSplashScreenAnimatedIcon">@drawable/secc_logo</item>
-        <item name="android:duration">3000</item>
+        <item name="windowSplashScreenBackground">@android:color/transparent</item>
+<!--        <item name="android:windowSplashScreenAnimatedIcon">@drawable/logo3</item>-->
         <item name="postSplashScreenTheme">@style/Theme.SecCouncil</item>  // point to the actual theme of your app.
     </style>
 </resources>
+

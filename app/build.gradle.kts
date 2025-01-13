@@ -80,4 +80,7 @@ dependencies {
     implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
     implementation ("androidx.lifecycle:lifecycle-livedata:2.8.7")
 
+    // coil for image loading
+    implementation("io.coil-kt.coil3:coil-compose:3.0.4")
+
 }
