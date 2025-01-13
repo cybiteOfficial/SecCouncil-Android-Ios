@@ -26,11 +26,12 @@ class SignUpViewModel : ViewModel() {
     val shouldCloseApp = mutableStateOf(false)
 
     // Input Fields
-    val username = mutableStateOf("")
     val email = mutableStateOf("")
     val password = mutableStateOf("")
     val confirmPassword = mutableStateOf("")
     val otpUser = mutableStateOf("")
+    val firstname = mutableStateOf("")
+    val lastname = mutableStateOf("")
 
     // Update Input Fields
 
@@ -38,8 +39,11 @@ class SignUpViewModel : ViewModel() {
     fun onOtpUserChange(newOtp: String) {
         otpUser.value = newOtp
     }
-    fun onUsernameChange(newUsername: String) {
-        username.value = newUsername
+    fun onFirstnameChange(newUsername: String) {
+        firstname.value = newUsername
+    }
+    fun onLastnameChange(newUsername: String) {
+        lastname.value = newUsername
     }
 
     fun onEmailChange(newEmail: String) {
@@ -58,7 +62,7 @@ class SignUpViewModel : ViewModel() {
     private fun validateFields(): Boolean {
         val errors = mutableListOf<String>()
 
-        if (username.value.trim().isEmpty() || email.value.trim().isEmpty() ||
+        if (firstname.value.trim().isEmpty()||lastname.value.trim().isEmpty() || email.value.trim().isEmpty() ||
             password.value.trim().isEmpty() || confirmPassword.value.trim().isEmpty()
         ) {
             errors.add("All fields are required.")
@@ -91,12 +95,13 @@ class SignUpViewModel : ViewModel() {
             viewModelScope.launch {
                 isLoading.value = true
                 registerUserApi()
-                if (isSignUpSuccessful.value) {
-                    validOtp.value = true
-                } else {
-                    errorMessage.value = "Registration failed. Please try again."
-                }
-                isLoading.value = false
+                isLoading.value = false // remove it
+//                if (isSignUpSuccessful.value) {
+//                    validOtp.value = true
+//                } else {
+//                    errorMessage.value = "Registration failed. Please try again."
+//                }
+////                isLoading.value = false
             }
         } else {
             errorMessage.value = "Invalid OTP. Please check and try again."
@@ -125,8 +130,8 @@ class SignUpViewModel : ViewModel() {
     private suspend fun registerUserApi() {
         try {
             val request = SignUpRequest(
-                firstName = username.value.split(" ").firstOrNull().orEmpty(),
-                lastName = username.value.split(" ").getOrNull(1).orEmpty(),
+                firstName = firstname.value,
+                lastName = lastname.value,
                 email = email.value,
                 password = password.value,
                 confirmPassword = confirmPassword.value,
@@ -137,6 +142,7 @@ class SignUpViewModel : ViewModel() {
             if (response.isSuccessful && response.body()?.success == true) {
                 isSignUpSuccessful.value = true
                 signUpMessage.value = response.body()?.message.orEmpty()
+                validOtp.value = true // remove this
             } else {
                 errorMessage.value = response.errorBody()?.string().orEmpty()
                 isSignUpSuccessful.value = false
@@ -175,20 +181,5 @@ class SignUpViewModel : ViewModel() {
                 isLoading.value = false
             }
         }
-    }
-
-    fun registerUser() {
-        viewModelScope.launch {
-            isLoading.value = true
-            try {
-                registerUserApi()
-            } finally {
-                isLoading.value = false
-            }
-        }
-    }
-
-    fun setShouldCloseApp(value: Boolean) {
-        shouldCloseApp.value = value
     }
 }
