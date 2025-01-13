@@ -50,7 +50,8 @@ import kotlin.math.log
 @Composable
 fun Login(
     onLoginClicked:()->Unit ={},
-    loginViewModel: LoginViewModel = viewModel()
+    loginViewModel: LoginViewModel = viewModel(),
+    onRegisterClick: () -> Unit = {}
 ){
     val context = LocalContext.current
     val loginEmail by loginViewModel.loginEmail
@@ -95,7 +96,8 @@ fun Login(
             errorMessage = errorMessage,
             loginMessage = loginMessage,
             isLoading = isLoading,
-            modifier = Modifier.align(Alignment.TopStart)
+            modifier = Modifier.align(Alignment.TopStart),
+            onRegisterClick = onRegisterClick
         )
 
         if (isLoading) {
@@ -123,7 +125,8 @@ fun LoginContent(
     errorMessage: String,
     loginMessage: String,
     isLoading: Boolean,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onRegisterClick:()->Unit = {}
 ){
     val context = LocalContext.current
     Column(
@@ -224,7 +227,8 @@ fun LoginContent(
         Spacer(Modifier.weight(1f))
         BottomText(
             normaltext = "Don't have an account?",
-            clickabletext = "Register Now"
+            clickabletext = "Register Now",
+            onClick = onRegisterClick
         )
         Spacer(Modifier.height(28.dp))
     }
