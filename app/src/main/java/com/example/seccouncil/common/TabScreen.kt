@@ -31,9 +31,6 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.seccouncil.R
-import com.example.seccouncil.screens.homescreen.AboutSection
-import com.example.seccouncil.screens.homescreen.LessonsSection
-import com.example.seccouncil.screens.homescreen.ReviewsSection
 import kotlin.math.roundToInt
 
 @Composable
@@ -87,11 +84,11 @@ fun TabScreen(
             tabWidth = tabWidthDp
         )
         Spacer(Modifier.height(20.dp))
-        when(selectedTabIndex){
-            1-> LessonsSection()
-            2 -> ReviewsSection()
-            else -> AboutSection()
-        }
+//        when(selectedTabIndex){
+//            1-> LessonsSection()
+//            2 -> ReviewsSection()
+//            else -> AboutSection()
+//        }
     }
 }
 

@@ -1,5 +1,6 @@
 package com.example.seccouncil.viewmodel
 
+//import com.example.seccouncil.SecCouncilReleaseApplication
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -10,7 +11,7 @@ import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.io.IOException
 
-class LoginViewModel : ViewModel() {
+class LoginViewModel() : ViewModel() {
 
     // UI States
     val errorMessage = mutableStateOf("")
@@ -31,6 +32,7 @@ class LoginViewModel : ViewModel() {
     fun onLoginPasswordChange(newPassword: String) {
         loginPassword.value = newPassword
     }
+
 
     // Validation
     private fun validateLoginFields(): Boolean {
@@ -66,7 +68,7 @@ class LoginViewModel : ViewModel() {
                 val response = ApiService.api.login(request)
                 if (response.isSuccessful && response.body()?.success == true) {
                     isLoginSuccessful.value = true
-                    loginMessage.value = response.body()?.message.orEmpty()
+                    loginMessage.value = response.body()?.message.orEmpty() // Save login state
                     navigateToHomeScreen.value = true
                     Log.e("check", "login success")
                 } else {

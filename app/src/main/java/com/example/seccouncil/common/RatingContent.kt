@@ -17,6 +17,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -24,7 +26,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
@@ -34,7 +35,6 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.seccouncil.R
@@ -88,24 +88,31 @@ fun RatingContent(
 @Preview(showBackground = true)
 @Composable
 fun EnrolledContent(
-    showEnroll:Boolean = true
+    showEnroll:Boolean = true,
+    tint:Color =  Color.Unspecified
 ){
     Row(
         modifier = Modifier
             .wrapContentWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(20.dp)
+        verticalAlignment = Alignment.CenterVertically
     ){
-        EnrollSubContent()
+        EnrollSubContent(
+            tint = tint
+        )
+        Spacer(Modifier.width(20.dp))
         EnrollSubContent(
             icon = R.drawable.lessons,
-            subject = "14 Lessons"
+            subject = "14 Lessons",
+            tint = tint
         )
-        if(showEnroll)
-        EnrollSubContent(
-            icon = R.drawable.users,
-            subject = "Enrolled"
-        )
+        if(showEnroll){
+            Spacer(Modifier.width(20.dp))
+            EnrollSubContent(
+                icon = R.drawable.users,
+                subject = "Enrolled",
+                tint = tint
+            )
+        }
     }
 }
 
@@ -114,20 +121,21 @@ fun EnrolledContent(
 private fun EnrollSubContent(
    @DrawableRes icon:Int =  R.drawable.clock,
    subject:String = "12h 52m",
-   contentDescription:String = ""
+   contentDescription:String = "",
+   tint:Color =  Color.Unspecified
 ){
     Row(
         modifier = Modifier
             .wrapContentWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
+        verticalAlignment = Alignment.CenterVertically
     ){
         Icon(
             painter = painterResource(icon),
             contentDescription = contentDescription,
             modifier = Modifier.size(14.dp),
-            tint = Color.Unspecified
+            tint = tint
         )
+        Spacer(Modifier.width(4.dp))
         TextComm(
             text = subject,
             fontSize = 12.sp,
@@ -207,6 +215,33 @@ fun ViewAllTitle(
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
             fontFamily = FontFamily.Monospace
+        )
+    }
+}
+
+
+@Preview(showBackground = true)
+@Composable
+fun ButtonComm(
+    text:String = "",
+    onClick:()->Unit = {},
+    modifier: Modifier = Modifier
+){
+    Button(
+        onClick = onClick,
+        modifier =modifier.wrapContentWidth(),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color.Black,
+            contentColor = Color.White
+        ),
+        shape = RoundedCornerShape(8.dp)
+    ){
+        TextComm(
+            text = text,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 12.sp,
+            lineHeight = 20.88.sp,
+            modifier = Modifier,
         )
     }
 }

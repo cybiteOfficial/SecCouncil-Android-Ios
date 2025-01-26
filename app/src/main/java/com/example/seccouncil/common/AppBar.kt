@@ -19,12 +19,17 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -33,17 +38,27 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun TopAppBar(
     modifier: Modifier = Modifier,
-    title:String,
+    title:String = "Hello",
+    fontSize:TextUnit = 20.sp,
     onClick: () -> Unit = {},
-    content:@Composable () -> Unit,
-    fontWeight: FontWeight = FontWeight.ExtraBold
+    content:@Composable () -> Unit = {},
+    fontWeight: FontWeight = FontWeight.ExtraBold,
+    showTrailingIcon:Boolean = true,
+    iconSize: Dp = 32.dp
 ){
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
         ,
+        containerColor = Color.White,
         topBar = {
             TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.White, // Set the background color of the TopAppBar
+                    titleContentColor = Color.Black, // Color for the title
+                    actionIconContentColor = Color.Black, // Color for the action icons like bell and profile
+                    navigationIconContentColor = Color.Black // Color for the navigation icon, if any
+                ),
                 title = {
                     Row(
                         modifier = Modifier.fillMaxWidth()
@@ -56,11 +71,12 @@ fun TopAppBar(
                         Text(
                             text = title,
                             textAlign = TextAlign.Center,
-                            fontSize = 20.sp,
+                            fontSize = fontSize,
                             fontFamily = FontFamily.Serif,
-                            fontWeight = FontWeight.ExtraBold
+                            fontWeight = fontWeight
                         )
                         Spacer(modifier = Modifier.weight(1f)) // Push the icon to the end
+                        if(showTrailingIcon)
                         Icon(
                             imageVector = Icons.Default.Add,
                             modifier = Modifier
@@ -75,7 +91,7 @@ fun TopAppBar(
                         Icon(
                             imageVector = Icons.Filled.ArrowBack,
                             contentDescription = "Back",
-                            modifier = Modifier.size(32.dp)
+                            modifier = Modifier.size(iconSize)
                         )
                     }
                 }

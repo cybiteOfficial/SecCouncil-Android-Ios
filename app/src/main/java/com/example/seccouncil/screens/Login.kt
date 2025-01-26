@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
@@ -43,7 +42,6 @@ import com.example.seccouncil.common.Dividerr
 import com.example.seccouncil.ui.theme.UrbanistTitleStyle
 import com.example.seccouncil.ui.theme.urbanist
 import com.example.seccouncil.viewmodel.LoginViewModel
-import kotlin.math.log
 
 
 @Preview(showBackground = true, showSystemUi = true)

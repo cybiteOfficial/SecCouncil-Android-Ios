@@ -45,8 +45,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.seccouncil.R
 import com.example.seccouncil.common.BottomContent
 import com.example.seccouncil.common.BottomText
+import com.example.seccouncil.common.CountryPicker
 import com.example.seccouncil.common.Dividerr
 import com.example.seccouncil.ui.theme.urbanist
+import com.rejowan.ccpc.Country
 
 
 @Preview(showBackground = true, showSystemUi = true)
@@ -63,6 +65,8 @@ fun SignUp(
     val navigateToOtpScreen by authViewModel.navigateToOtpScreen
     val firstname by authViewModel.firstname
     val lastname by authViewModel.lastname
+    val phoneNumber by authViewModel.phoneNumber
+    val countryCode by authViewModel.countryCode
 
     if (navigateToOtpScreen) {
         onClickToOTP()
@@ -94,7 +98,12 @@ fun SignUp(
                 onEmailChange = {authViewModel.onEmailChange(it)},
                 onPasswordChange = {authViewModel.onPasswordChange(it)},
                 onConfirmPasswordChange = {authViewModel.onConfirmPasswordChange(it)},
-                onRegisterClick = {authViewModel.senDOtp()}
+                onRegisterClick = {authViewModel.senDOtp()},
+                phoneNumber = phoneNumber,
+                country = countryCode,
+                onPhoneNumberChange = {authViewModel.onPhoneNumberChange(it)},
+                onCountryCodeChange = {authViewModel.onCountryCodeChange(it)}
+
             )
 
             BottomContent()
@@ -138,7 +147,11 @@ fun SignUpContent(
     firstname:String,
     lastname:String,
     onFirstnameChange:(String)->Unit,
-    onLastnameChange:(String)->Unit
+    onLastnameChange:(String)->Unit,
+    phoneNumber: String,
+    onPhoneNumberChange: (String) -> Unit,
+    country: Country,
+    onCountryCodeChange:(Country)->Unit
 ) {
         Column(
             modifier = Modifier
@@ -186,6 +199,13 @@ fun SignUpContent(
                 imeAction = ImeAction.Next,
                 value = email,
                 onValueChange = onEmailChange
+            )
+            Spacer(Modifier.height(12.dp))
+            CountryPicker(
+                        phoneNumber = phoneNumber,
+                country = country,
+                onPhoneNumberChange = onPhoneNumberChange,
+                onCountryCodeChange = onCountryCodeChange
             )
             Spacer(Modifier.height(12.dp))
             InputField(
@@ -266,8 +286,10 @@ fun InputField(
             fontFamily = FontFamily.SansSerif,
             fontWeight = FontWeight.Normal,
             color = colorResource(R.color.place_holder)
-        ) }
+        ) },
+        maxLines = 1
     )
 }
+
 
 

@@ -1,10 +1,9 @@
 package com.example.seccouncil.network
 
 import com.google.gson.annotations.SerializedName
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.POST
-import retrofit2.Response
-import retrofit2.http.GET
 
 // Define request data classes
 data class SignUpRequest(
@@ -14,7 +13,8 @@ data class SignUpRequest(
     val confirmPassword: String,
     val email: String,
     val accountType: String,
-    val otp: String
+    val otp: String,
+    val contactNumber: String
 )
 
 data class EmailRequest(val email: String)

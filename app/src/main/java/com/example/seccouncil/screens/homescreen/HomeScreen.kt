@@ -1,9 +1,7 @@
 package com.example.seccouncil.screens.homescreen
 
-import android.text.BoringLayout
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,30 +13,24 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.paddingFrom
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Notifications
-import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -49,118 +41,78 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.LinearGradientShader
-import androidx.compose.ui.graphics.TileMode
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import com.example.seccouncil.R
 import com.example.seccouncil.common.EnrolledContent
 import com.example.seccouncil.common.LinearProgressBarWithCircle
-import com.example.seccouncil.common.LinearProgressBarWithCirclePreview
 import com.example.seccouncil.common.RatingContent
+import com.example.seccouncil.common.SearchBar
 import com.example.seccouncil.common.TextComm
 import com.example.seccouncil.common.ViewAllTitle
+import com.example.seccouncil.screens.DownloadScreen
+import com.example.seccouncil.screens.profilesetting.ProfileScreen
 import com.example.seccouncil.ui.theme.urbanist
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun HomeScreen(
-    onHomeClicked:()->Unit = {},
-    onCourseClicked:()->Unit = {},
-    onCertificationClicked:()->Unit = {},
-    onProfileClicked:()->Unit = {},
-    onProfileSettingClicked: () -> Unit = {},
-    onBellClicked: () -> Unit = {},
-    onSearchClicked: () -> Unit={}
-) {
-    val navItemList = listOf(
-        NavItem("Home", icon = R.drawable.home), // Replace with your icons
-        NavItem("Courses", icon = R.drawable.school),
-        NavItem("Downloads", icon = R.drawable.download),
-        NavItem("Profile", icon = R.drawable.profile)
-    )
-    var selectedIndex by remember {
-        mutableIntStateOf(0)
-    }
-
-        Scaffold(
+fun HomeScreen() {
+    val navController = rememberNavController()
+    val currentDestination = navController.currentBackStackEntryAsState().value?.destination?.route
+    Scaffold(
             modifier = Modifier
                 .fillMaxSize(),
             topBar = {
-                TopAppBar(
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = Color.White, // Set the background color of the TopAppBar
-                        titleContentColor = Color.Black, // Color for the title
-                        actionIconContentColor = Color.Black, // Color for the action icons like bell and profile
-                        navigationIconContentColor = Color.Black // Color for the navigation icon, if any
-                    ),
-                    title = {
-                        TopContent(
-                            onBellClicked = onBellClicked,
-                            onProfileClicked = onProfileClicked
-                        )
-                    }
-                )
+                if (currentDestination == "home") {
+                    TopAppBar(
+                        colors = TopAppBarDefaults.topAppBarColors(
+                            containerColor = Color.White, // Background color
+                            titleContentColor = Color.Black, // Title color
+                            actionIconContentColor = Color.Black, // Action icon color
+                            navigationIconContentColor = Color.Black // Navigation icon color
+                        ),
+                        title = {
+                            TopContent()
+                        }
+                    )
+                }
             },
             containerColor = Color.White,
             bottomBar = {
-                NavigationBar(
-                    containerColor = Color.White
-                ) {
-                    navItemList.forEachIndexed { index, navItem ->
-                        NavigationBarItem(
-                            selected = selectedIndex == index,
-                            onClick = { selectedIndex = index },
-                            icon = {
-                                Icon(
-                                    painter = painterResource(id = navItem.icon),
-                                    contentDescription = null,
-                                    modifier = Modifier.size( 24.dp)
-                                        .clickable {
-                                            when(index){
-                                                0->onHomeClicked()
-                                                1->onCourseClicked()
-                                                2->onCertificationClicked()
-                                                3->onProfileSettingClicked()
-                                            }
-                                        }
-                                )
-                            },
-                            label = {
-                                Text(
-                                    text = navItem.label,
-                                    modifier = Modifier
-                                        .offset(y =  (-6).dp)
-                                )
-                            }
-                        )
-                    }
-                }
+                    BottomNavigationBar(navController)
             }
         ) { innerPadding ->
-            ContentScreen(
-                modifier = Modifier.padding(innerPadding),
-                onCourseClicked = onCourseClicked
-            )
+            NavHost(
+                navController = navController,
+                startDestination = "home",
+                modifier = Modifier.padding(innerPadding)
+            ) {
+                composable("home") { ContentScreen(onCourseClicked = { navController.navigate("courses") }) }
+                composable("courses") { CourseScreen(onBackClicked = { navController.popBackStack() }) }
+                composable("profile") { ProfileScreen() }
+                composable("downloads"){ DownloadScreen() }
+            }
         }
     }
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ContentScreen(modifier: Modifier = Modifier,
                   onCourseClicked: () -> Unit = {},
@@ -176,7 +128,7 @@ fun ContentScreen(modifier: Modifier = Modifier,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(Modifier.height(20.dp))
-        AdBanner()
+        SearchBar()
         Spacer(Modifier.height(20.dp))
         if(enrolled){
            ViewAllTitle(title = "Ongoing Courses")
@@ -246,66 +198,6 @@ private fun TopContent(
     }
 
 @Composable
-private fun AdBanner(
-    modifier: Modifier = Modifier
-){
-    Box(
-        modifier = Modifier
-            .wrapContentSize()
-            .clip(RoundedCornerShape(12.dp)) // Clip the content
-            .drawBehind { // Custom stroke effect
-                val strokeWidth = 3.dp.toPx() // Stroke width
-                val cornerRadius = 12.dp.toPx() // Corner radius
-                drawRoundRect(
-                    color = Color.Gray, // Stroke color
-                    size = size.copy(
-                        width = size.width - strokeWidth,
-                        height = size.height - strokeWidth
-                    ),
-                    topLeft = Offset(strokeWidth / 2, strokeWidth / 2),
-                    cornerRadius = CornerRadius(cornerRadius, cornerRadius),
-                    style = Stroke(width = strokeWidth)
-                )
-            }
-            .background(Color.White) // Background color inside stroke
-    ) {
-        OutlinedTextField(
-            value = "",
-            onValueChange = { "" },
-            modifier = Modifier
-                .height(50.dp)
-                .fillMaxWidth()
-                .background(Color.Transparent)
-                .clip(RoundedCornerShape(10.dp)), // Inner content clipping
-            placeholder = {
-                Text(
-                    text = "Search courses",
-                    textAlign = TextAlign.Center,
-                    fontSize = 16.sp,
-                    color = Color.Gray
-                )
-            },
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Outlined.Search,
-                    contentDescription = "Search",
-                    modifier = Modifier.size(24.dp)
-                )
-            },
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = Color.Transparent,
-                unfocusedContainerColor = Color.Transparent,
-                disabledContainerColor = Color.Transparent,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                disabledIndicatorColor = Color.Transparent
-            )
-        )
-    }
-
-}
-
-@Composable
 private fun OnGoingCourses(
     modifier: Modifier = Modifier,
     title: String = "Cyber Security Beginner",
@@ -349,16 +241,17 @@ private fun OnGoingCourses(
             Spacer(Modifier.height(8.dp))
             LinearProgressBarWithCircle(finished = 5, total = 14)
             Spacer(Modifier.height(2.dp))
-            Text(
-                text = "$videosLeft videos left",
-                color = Color.LightGray,
-                fontSize = 12.sp,
-                fontFamily = urbanist,
-                modifier = Modifier
-                    .padding(start = 247.dp)
-            )
-
-
+            Row(){
+                    Spacer(Modifier.weight(1f))
+                Text(
+                    text = "$videosLeft videos left",
+                    color = Color.LightGray,
+                    fontSize = 12.sp,
+                    fontFamily = urbanist,
+                    modifier = Modifier
+                        .padding(end = 20.dp)
+                )
+            }
         }
 
     }
@@ -466,76 +359,55 @@ private fun Course(
     }
 }
 
+@Composable
+fun BottomNavigationBar(
+    navController: NavController = rememberNavController()
+) {
+    val navItemList = listOf(
+        NavItem("Home", icon = R.drawable.home), // Replace with your icons
+        NavItem("Courses", icon = R.drawable.school),
+        NavItem("Downloads", icon = R.drawable.download),
+        NavItem("Profile", icon = R.drawable.profile)
+    )
+    val currentRoute = navController.currentBackStackEntry?.destination?.route
 
-//@Preview(showBackground = true)
-//@Composable
-//private fun CourseContent(
-//    modifier: Modifier = Modifier,
-//    rating: String = "4.7",
-//    no_of_students: String = "1,102",
-//    madeBy: String = "Aadil Aariz",
-//    subject: String = "Coding"
-//) {
-//    Column(
-//        horizontalAlignment = Alignment.Start,
-//        modifier = modifier
-//    ) {
-//        // First row: Rating | Students
-//        Row(
-//            modifier = Modifier.fillMaxWidth(),
-//            horizontalArrangement = Arrangement.Start,
-//            verticalAlignment = Alignment.CenterVertically
-//        ) {
-//            Text(
-//                text = "Rating $rating/5",
-//                color = colorResource(R.color.place_holder),
-//                fontFamily = FontFamily.Serif,
-//                fontSize = 12.sp
-//            )
-//            Spacer(Modifier.width(5.dp))
-//            VerticalDivider(
-//                modifier = Modifier
-//                    .height(12.dp),
-//                thickness = 1.dp,
-//                color = Color.DarkGray
-//            )
-//            Spacer(Modifier.width(5.dp))
-//            Text(
-//                text = "$no_of_students students",
-//                color = colorResource(R.color.place_holder),
-//                fontFamily = FontFamily.Serif,
-//                fontSize = 12.sp
-//            )
-//        }
-//
-//        Spacer(modifier = Modifier.height(5.dp))
-//
-//        // Second row: MadeBy | Subject
-//        Row(
-//            modifier = Modifier.fillMaxWidth(),
-//            horizontalArrangement = Arrangement.Start,
-//            verticalAlignment = Alignment.CenterVertically
-//        ) {
-//            Text(
-//                text = "$madeBy",
-//                color = colorResource(R.color.place_holder),
-//                fontFamily = FontFamily.Serif,
-//                fontSize = 12.sp
-//            )
-//            Spacer(Modifier.width(5.dp))
-//            VerticalDivider(
-//                modifier = Modifier
-//                    .height(12.dp),
-//                thickness = 1.dp,
-//                color = Color.DarkGray
-//            )
-//            Spacer(Modifier.width(5.dp))
-//            Text(
-//                text = "$subject",
-//                color = colorResource(R.color.place_holder),
-//                fontFamily = FontFamily.Serif,
-//                fontSize = 12.sp
-//            )
-//        }
-//    }
-//}
+    // NavigationBar is a container for bottom navigation items.
+    NavigationBar {
+        // Loop through each navigation item (route and icon) from the list.
+        navItemList.forEach { (route, icon) ->
+            // Add a NavigationBarItem for each item in the list.
+            NavigationBarItem(
+                // Mark the item as selected if it matches the current route.
+                selected = currentRoute == route,
+                // Define what happens when the navigation item is clicked.
+                onClick = {
+                    // Navigate to the corresponding route.
+                    navController.navigate(route) {
+                        // Clear the back stack up to the start destination to avoid duplicate entries.
+                        popUpTo(navController.graph.startDestinationId) {
+                            saveState = true // Save the state of the previous destination.
+                        }
+                        launchSingleTop = true // Prevent creating multiple instances of the same destination.
+                        restoreState = true // Restore the saved state of the destination when revisiting it.
+                    }
+                },
+                // Define the icon to display for the navigation item.
+                icon = {
+                    Icon(
+                        painter = painterResource(icon), // Load the icon from resources.
+                        contentDescription = null, // Provide accessibility (null here since it's decorative).
+                        modifier = Modifier.size(24.dp) // Set the size of the icon to 24dp.
+                    )
+                },
+                // Define the label for the navigation item.
+                label = {
+                    Text(
+                        text = route, // Display the route name as the label.
+                        modifier = Modifier
+                            .offset(y = (-6).dp) // Slightly adjust the label's position vertically.
+                    )
+                }
+            )
+        }
+    }
+}

@@ -83,4 +83,10 @@ dependencies {
     // coil for image loading
     implementation("io.coil-kt.coil3:coil-compose:3.0.4")
 
+    // Datastore Preference
+    implementation("androidx.datastore:datastore-preferences:1.1.2")
+
+    // country picker
+    implementation("com.github.ahmmedrejowan:CountryCodePickerCompose:0.1")
+
 }
