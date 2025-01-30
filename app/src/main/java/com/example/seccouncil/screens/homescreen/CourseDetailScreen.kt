@@ -37,10 +37,12 @@ import com.example.seccouncil.common.TopAppBar
 
 @Preview(showSystemUi = true)
 @Composable
-fun CourseDetailScreen(){
+fun CourseDetailScreen(
+    onClick:()->Unit = {}
+){
     TopAppBar(
         title = "Fundamentals of Cyber Security",
-        onClick = {},
+        onClick = onClick,
         fontSize = 16.sp,
         iconSize = 28.dp,
         showTrailingIcon = false,

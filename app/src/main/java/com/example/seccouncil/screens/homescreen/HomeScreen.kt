@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.paddingFrom
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -34,6 +35,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -64,17 +66,28 @@ import com.example.seccouncil.common.RatingContent
 import com.example.seccouncil.common.SearchBar
 import com.example.seccouncil.common.TextComm
 import com.example.seccouncil.common.ViewAllTitle
+import com.example.seccouncil.model.UserDetails
+import com.example.seccouncil.navigation.Routes
+import com.example.seccouncil.network.User
 import com.example.seccouncil.screens.DownloadScreen
 import com.example.seccouncil.screens.profilesetting.ProfileScreen
+import com.example.seccouncil.screens.profilesetting.ProfileSettingScreen
 import com.example.seccouncil.ui.theme.urbanist
+import com.example.seccouncil.utlis.DataStoreManger
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.Flow
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun HomeScreen() {
+fun HomeScreen(
+userDetails: Flow<UserDetails>
+) {
+
     val navController = rememberNavController()
     val currentDestination = navController.currentBackStackEntryAsState().value?.destination?.route
+    val userDetail = userDetails.collectAsState(initial = null)
     Scaffold(
             modifier = Modifier
                 .fillMaxSize(),
@@ -88,7 +101,9 @@ fun HomeScreen() {
                             navigationIconContentColor = Color.Black // Navigation icon color
                         ),
                         title = {
-                            TopContent()
+                            TopContent(
+                                name = userDetail.value?.name?:""
+                            )
                         }
                     )
                 }
@@ -103,10 +118,30 @@ fun HomeScreen() {
                 startDestination = "home",
                 modifier = Modifier.padding(innerPadding)
             ) {
-                composable("home") { ContentScreen(onCourseClicked = { navController.navigate("courses") }) }
+                composable("home") { ContentScreen(onCourseClicked = { navController.navigate("courseDetail") }) }
                 composable("courses") { CourseScreen(onBackClicked = { navController.popBackStack() }) }
-                composable("profile") { ProfileScreen() }
-                composable("downloads"){ DownloadScreen() }
+                composable("profile") { ProfileScreen(
+                        onProfileClicked = {navController.navigate("profileSetting")},
+                    name = userDetail.value?.name?:"",
+                    email = userDetail.value?.emailAddress?:""
+
+                ) }
+                composable("downloads"){ DownloadScreen(
+
+                )
+                }
+                composable("profileSetting"){
+                    ProfileSettingScreen(
+                        name = userDetail.value?.name?:"",
+                        email = userDetail.value?.emailAddress?:"",
+                        phoneNumber = userDetail.value?.mobileNumber?:""
+                    )
+                }
+                composable("courseDetail"){
+                        CourseDetailScreen(
+                            onClick = { navController.popBackStack() }
+                        )
+                }
             }
         }
     }
@@ -153,8 +188,10 @@ fun ContentScreen(modifier: Modifier = Modifier,
 private fun TopContent(
     modifier: Modifier = Modifier,
     onProfileClicked:()->Unit = {},
-    onBellClicked:()->Unit = {}
+    onBellClicked:()->Unit = {},
+    name:String = ""
 ){
+   // val userDetails by dataStoreManger.getFromDataStore().collectAsState(initial = null)
     Row(
         modifier = Modifier.fillMaxWidth()
             .padding(end = 15.dp)
@@ -179,7 +216,7 @@ private fun TopContent(
                 )
                 Spacer(modifier=Modifier.height(1.dp))
                 Text(
-                    "Alex Jackson",
+                    text = name,
                     style = TextStyle(
                         fontFamily = urbanist,
                         fontSize = 16.sp,
@@ -343,11 +380,10 @@ private fun Course(
                     .clickable {
                         onCourseClicked()
                     }
-
             )
             Spacer(Modifier.height(8.dp))
             Text(
-                text = "${courseName}",
+                text = courseName,
                 style = TextStyle(
                     fontFamily = urbanist,
                     fontSize = 14.sp,

@@ -62,14 +62,6 @@ fun ProfileScreenItem(
                 fontWeight = fontWeight,
                 color = color
             )
-            Spacer(Modifier.weight(1f))
-            Icon(
-                imageVector = Icons.Filled.KeyboardArrowRight,
-                contentDescription = "KeyboardArrowRight",
-                modifier = Modifier
-                    .size(32.dp),
-                tint = Color.Gray
-            )
         }
         Spacer(Modifier.height(15.dp))
         HorizontalDivider(

@@ -53,11 +53,9 @@ import com.example.seccouncil.ui.theme.urbanist
 fun ProfileScreen(
     modifier: Modifier = Modifier,
     onProfileClicked:()->Unit = {},
-    onSecurityClicked:()->Unit = {},
-    onCertificationsClicked:()->Unit = {},
-    onHelpCenterClicked:()->Unit = {},
-    onFavouritesClicked:()->Unit = {},
-    onBackClicked:()->Unit = {}
+    onBackClicked:()->Unit = {},
+    name:String = "",
+    email:String = ""
 
 ){
     val profileOptions = listOf("Profile","Favorites",
@@ -139,7 +137,7 @@ fun ProfileScreen(
                 }
                 Spacer(Modifier.height(5.dp))
                 Text(
-                    text = "Alex Jackson",
+                    text = name,
                     style = TextStyle(
                         fontFamily = urbanist,
                         fontSize = 20.sp,
@@ -147,7 +145,7 @@ fun ProfileScreen(
                     )
                 )
                 Text(
-                    text = "alexj1234@gmail.com",
+                    text = email,
                     fontFamily = FontFamily.Monospace,
                     fontSize = 16.sp,
                     color = Color.Gray
@@ -156,7 +154,7 @@ fun ProfileScreen(
             }
 
            Button(
-               onClick = {},
+               onClick = onProfileClicked,
                modifier = Modifier
                    .fillMaxWidth(),
                colors = ButtonColors(

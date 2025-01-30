@@ -52,14 +52,6 @@ fun ProfileScreenSettingItem(
             )
             Spacer(Modifier.width(15.dp))
             TextBind(title = title, description = description)
-            Spacer(Modifier.weight(1f))
-            Icon(
-                imageVector = Icons.Filled.KeyboardArrowRight,
-                contentDescription = "KeyboardArrowRight",
-                modifier = Modifier
-                    .size(32.dp),
-                tint = Color.Gray
-            )
         }
         Spacer(Modifier.height(5.dp))
         HorizontalDivider(

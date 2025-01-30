@@ -3,16 +3,22 @@ package com.example.seccouncil.screens
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.example.seccouncil.model.UserDetails
 import com.example.seccouncil.network.ApiService
 import com.example.seccouncil.network.EmailRequest
 import com.example.seccouncil.network.SignUpRequest
+import com.example.seccouncil.utlis.DataStoreManger
 import com.rejowan.ccpc.Country
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.io.IOException
 
-class SignUpViewModel : ViewModel() {
+class SignUpViewModel(
+    private val dataStoreManager: DataStoreManger, // Inject the DataStoreManager
+    private val onRegisterSuccess: () -> Unit
+) : ViewModel() {
 
     // UI States
     val otpSentMessage = mutableStateOf("")
@@ -24,7 +30,6 @@ class SignUpViewModel : ViewModel() {
     val isLoading = mutableStateOf(false)
     val navigateToOtpScreen = mutableStateOf(false)
     val validOtp = mutableStateOf(false)
-    val shouldCloseApp = mutableStateOf(false)
 
     // Input Fields
     val email = mutableStateOf("")
@@ -160,9 +165,10 @@ class SignUpViewModel : ViewModel() {
             val response = ApiService.api.signUp(request)
             if (response.isSuccessful && response.body()?.success == true) {
                 isSignUpSuccessful.value = true
+                onRegisterSuccess()
+                saveUserDetailsToDataStore(onRegisterSuccess)
                 signUpMessage.value = response.body()?.message.orEmpty()
                 validOtp.value = true // remove this
-
             } else {
                 errorMessage.value = response.errorBody()?.string().orEmpty()
                 isSignUpSuccessful.value = false
@@ -182,6 +188,23 @@ class SignUpViewModel : ViewModel() {
         Log.e("SignUpViewModel", errorMessage.value, e)
     }
 
+    fun saveUserDetailsToDataStore(onRegisterSuccess: () -> Unit) {
+        if (isSignUpSuccessful.value) {
+            val userDetails = UserDetails(
+                emailAddress = email.value,
+                name = "${firstname.value} ${lastname.value}",
+                mobileNumber = "${countryCode.value.countryCode}${phoneNumber.value}"
+            )
+            viewModelScope.launch {
+                try {
+                    dataStoreManager.saveToDataStore(userDetails)
+                    onRegisterSuccess()
+                } catch (e: Exception) {
+                    Log.e("SignUpViewModel", "Error saving user details: ${e.message}", e)
+                }
+            }
+        }
+    }
     // Public Functions
     fun senDOtp() {
         if (!validateFields()) return
@@ -205,5 +228,17 @@ class SignUpViewModel : ViewModel() {
                 isLoading.value = false
             }
         }
+    }
+}
+
+class SignUpViewModelFactory(
+    private val dataStoreManager: DataStoreManger,
+    private val onRegisterSuccess: () -> Unit
+) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(SignUpViewModel::class.java)) {
+            return SignUpViewModel(dataStoreManager, onRegisterSuccess) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }

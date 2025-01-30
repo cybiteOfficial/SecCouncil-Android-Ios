@@ -1,6 +1,5 @@
 package com.example.seccouncil.common
 
-import android.util.Log
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -23,6 +22,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.seccouncil.R
 import com.rejowan.ccpc.CCPTransformer
 import com.rejowan.ccpc.CCPValidator
@@ -81,7 +81,8 @@ fun CountryPicker(
                 text = "Enter Your Phone Number",
                 fontFamily = FontFamily.SansSerif,
                 fontWeight = FontWeight.Normal,
-                color = colorResource(R.color.place_holder)
+                color = colorResource(R.color.place_holder),
+                fontSize = 12.sp
             )
         },
 //        label = {

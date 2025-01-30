@@ -69,8 +69,6 @@ fun Otp(
     var validOtp by authViewModel.validOtp // Assuming LiveData
     val errorMessage by authViewModel.errorMessage
     val signUpMessage by authViewModel.signUpMessage
-    val shouldCloseApp by authViewModel.shouldCloseApp
-    val context = LocalContext.current
 
     LaunchedEffect(key1 = validOtp) {
         if (validOtp) {
@@ -170,7 +168,7 @@ fun OtpContent(
                 )
             }
             if (signUpMessage.isNotEmpty()) {
-                Toast.makeText(context, "Sign-In Successfully", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Welcome, ${viewModel.firstname.value} ${viewModel.lastname.value}", Toast.LENGTH_SHORT).show()
             }
         }
         Spacer(Modifier.height(40.dp))
