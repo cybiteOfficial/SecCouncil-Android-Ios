@@ -231,14 +231,31 @@ class SignUpViewModel(
     }
 }
 
+// Define a factory class that creates ViewModels
+// This class takes two parameters:
+// 1. dataStoreManager: to handle data storage
+// 2. onRegisterSuccess: a callback function that takes no parameters and returns nothing
 class SignUpViewModelFactory(
     private val dataStoreManager: DataStoreManger,
     private val onRegisterSuccess: () -> Unit
 ) : ViewModelProvider.Factory {
+
+    // Override the create method from ViewModelProvider.Factory
+    // This method is responsible for creating ViewModel instances
+    // The 'T' means it can return any type that extends ViewModel
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
+
+        // Check if the requested class (modelClass) is SignUpViewModel
+        // or a parent class of SignUpViewModel
         if (modelClass.isAssignableFrom(SignUpViewModel::class.java)) {
+            // If it is, create a new instance of SignUpViewModel with our parameters
+            // and cast it to type T
             return SignUpViewModel(dataStoreManager, onRegisterSuccess) as T
         }
+
+        // If the requested class is not SignUpViewModel, throw an error
         throw IllegalArgumentException("Unknown ViewModel class")
     }
 }
+
+
