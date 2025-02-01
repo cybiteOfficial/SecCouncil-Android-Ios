@@ -74,6 +74,7 @@ import com.example.seccouncil.screens.profilesetting.ProfileScreen
 import com.example.seccouncil.screens.profilesetting.ProfileSettingScreen
 import com.example.seccouncil.ui.theme.urbanist
 import com.example.seccouncil.utlis.DataStoreManger
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 
@@ -82,7 +83,9 @@ import kotlinx.coroutines.flow.Flow
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun HomeScreen(
-userDetails: Flow<UserDetails>
+userDetails: Flow<UserDetails>,
+profileViewmodel: HomescreenViewmodel,
+scope: CoroutineScope
 ) {
 
     val navController = rememberNavController()
@@ -123,7 +126,9 @@ userDetails: Flow<UserDetails>
                 composable("profile") { ProfileScreen(
                         onProfileClicked = {navController.navigate("profileSetting")},
                     name = userDetail.value?.name?:"",
-                    email = userDetail.value?.emailAddress?:""
+                    email = userDetail.value?.emailAddress?:"",
+                    viewModel = profileViewmodel,
+                    scope = scope
 
                 ) }
                 composable("downloads"){ DownloadScreen(
@@ -134,11 +139,13 @@ userDetails: Flow<UserDetails>
                     ProfileSettingScreen(
                         name = userDetail.value?.name?:"",
                         email = userDetail.value?.emailAddress?:"",
-                        phoneNumber = userDetail.value?.mobileNumber?:""
+                        phoneNumber = userDetail.value?.mobileNumber?:"",
+                        viewModel = profileViewmodel,
+                        scope = scope
                     )
                 }
                 composable("courseDetail"){
-                        CourseDetailScreen(
+                        ResponsiveCourseDetailScreen(
                             onClick = { navController.popBackStack() }
                         )
                 }
