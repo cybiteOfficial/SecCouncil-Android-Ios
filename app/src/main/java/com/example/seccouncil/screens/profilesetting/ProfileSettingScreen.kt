@@ -1,5 +1,8 @@
 package com.example.seccouncil.screens.profilesetting
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -8,7 +11,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -17,13 +19,18 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -31,11 +38,14 @@ import androidx.compose.ui.text.style.TextMotion
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil3.compose.rememberAsyncImagePainter
 import com.example.seccouncil.R
 import com.example.seccouncil.common.ProfileScreenSettingItem
 import com.example.seccouncil.common.TopAppBar
-import com.example.seccouncil.network.EmailRequest
+import com.example.seccouncil.screens.homescreen.HomescreenViewmodel
 import com.example.seccouncil.ui.theme.urbanist
+import kotlinx.coroutines.CoroutineScope
+import java.io.File
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
@@ -45,6 +55,8 @@ fun ProfileSettingScreen(
     name:String = "",
     email:String = "",
     phoneNumber:String = "",
+    viewModel: HomescreenViewmodel,
+    scope: CoroutineScope
 ) {
     val profilescreensettingitemtitle: List<ProfileSettingItem> =
         listOf(
@@ -52,6 +64,27 @@ fun ProfileSettingScreen(
             ProfileSettingItem(R.drawable.mail, "Mail", email),
             ProfileSettingItem(R.drawable.mobile, "Mobile number", phoneNumber),
         )
+
+    val context = LocalContext.current
+
+    // Collect the current file name from the ViewModel’s StateFlow
+    val imageFileName by viewModel.imageFileName.collectAsState()
+
+    // This checks whether the image file name is still being fetched.
+    // For example, if you want a loading indicator while the file name is null from DataStore:
+    val isLoading = (imageFileName == null)
+
+    // Launcher for picking images
+    val getContentLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            viewModel.saveImageToInternalStorage(it)
+        }
+    }
+
+
+
     TopAppBar(
         title = "Profile",
         onClick = onBackClicked,
@@ -69,11 +102,32 @@ fun ProfileSettingScreen(
                         .border(0.5.dp, color = Color.White, RoundedCornerShape(10.dp))
                         .clip(RoundedCornerShape(10.dp))
                 ) {
-                    Image(
-                        painter = painterResource(R.drawable.profilepic),
-                        contentDescription = "profile pic change",
-                        modifier = Modifier.fillMaxSize()
-                    )
+                    if (isLoading) {
+                        // Show spinner if still loading from DataStore
+                        CircularProgressIndicator(Modifier.align(Alignment.Center))
+                    } else if (!imageFileName.isNullOrEmpty()) {
+                        // Display the image saved to internal storage
+                        Image(
+                            painter = rememberAsyncImagePainter(
+                                File(context.filesDir, imageFileName!!)
+                            ),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(225.dp)
+                                .clip(CircleShape),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        // Show a default image if no filename stored
+                        Image(
+                            painter = painterResource(R.drawable.profilepic),
+                            contentDescription = "Default",
+                            modifier = Modifier
+                                .size(225.dp)
+                                .clip(CircleShape),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
                     Icon(
                         painter = painterResource(R.drawable.gallary2), // Replace with your gallery icon
                         contentDescription = "Change Profile Picture",
@@ -84,7 +138,9 @@ fun ProfileSettingScreen(
                             .padding(8.dp) // Add padding for spacing
                             .background(Color.White, CircleShape) // Add background to the icon
                             .padding(8.dp)
-                            .clickable {  }
+                            .clickable {
+                                getContentLauncher.launch("image/*")
+                            }
                     )
                 }
                 Spacer(Modifier.height(5.dp))
