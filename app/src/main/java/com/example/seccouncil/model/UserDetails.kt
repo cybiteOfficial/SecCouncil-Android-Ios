@@ -7,3 +7,7 @@ val password: String = "",
 val name: String = "",
 )
 
+data class UserProfilePhoto(
+    val photo: String
+)
+
