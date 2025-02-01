@@ -7,6 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.lifecycleScope
 import com.example.seccouncil.navigation.Navigation
 import com.example.seccouncil.screens.SplashViewModel
 import com.example.seccouncil.ui.theme.SecCouncilTheme
@@ -27,7 +28,9 @@ class MainActivity : ComponentActivity() {
                 val dataStoreManger = DataStoreManger(dataStoreContext)
                 Navigation(
                    preferenceDataStore =  preferenceDataStore,
-                   dataStoreManger =  dataStoreManger
+                   dataStoreManger =  dataStoreManger,
+                    context = dataStoreContext,
+                    scope = lifecycleScope
                 )
             }
         }
