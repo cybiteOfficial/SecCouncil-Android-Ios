@@ -2,6 +2,7 @@ package com.example.seccouncil.common
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -28,76 +29,16 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-//@Composable
-//fun SearchBar(
-//    modifier: Modifier = Modifier
-//){
-//    Box(
-//        modifier = Modifier
-//            .wrapContentSize()
-//            .clip(RoundedCornerShape(12.dp)) // Clip the content
-//            .drawBehind { // Custom stroke effect
-//                val strokeWidth = 3.dp.toPx() // Stroke width
-//                val cornerRadius = 12.dp.toPx() // Corner radius
-//                drawRoundRect(
-//                    color = Color.Gray, // Stroke color
-//                    size = size.copy(
-//                        width = size.width - strokeWidth,
-//                        height = size.height - strokeWidth
-//                    ),
-//                    topLeft = Offset(strokeWidth / 2, strokeWidth / 2),
-//                    cornerRadius = CornerRadius(cornerRadius, cornerRadius),
-//                    style = Stroke(width = strokeWidth)
-//                )
-//            }
-//            .background(Color.White) // Background color inside stroke
-//    ) {
-//        OutlinedTextField(
-//            value = "",
-//            onValueChange = { "" },
-//            modifier = Modifier
-//                .height(50.dp)
-//                .fillMaxWidth()
-//                .background(Color.Transparent)
-//                .clip(RoundedCornerShape(10.dp)), // Inner content clipping
-//            placeholder = {
-//                Text(
-//                    text = "Search courses",
-//                    textAlign = TextAlign.Center,
-//                    fontSize = 16.sp,
-//                    color = Color.Gray
-//                )
-//            },
-//            leadingIcon = {
-//                Icon(
-//                    imageVector = Icons.Outlined.Search,
-//                    contentDescription = "Search",
-//                    modifier = Modifier.size(24.dp)
-//                )
-//            },
-//            colors = TextFieldDefaults.colors(
-//                focusedContainerColor = Color.Transparent,
-//                unfocusedContainerColor = Color.Transparent,
-//                disabledContainerColor = Color.Transparent,
-//                focusedIndicatorColor = Color.Transparent,
-//                unfocusedIndicatorColor = Color.Transparent,
-//                disabledIndicatorColor = Color.Transparent
-//            )
-//        )
-//    }
-//
-//}
-
-//
 @Preview(showSystemUi = true)
 @Composable
-fun SearchBar(
+fun ResponsiveSearchBar(
     value: String = "",
     onValueChange: (String) -> Unit = {},
     modifier: Modifier = Modifier,
@@ -106,50 +47,46 @@ fun SearchBar(
     strokeColor: Color = Color.Gray,
     backgroundColor: Color = Color.White,
     cornerRadius: Dp = 12.dp,
-    strokeWidth: Dp = 3.dp,
+    strokeWidth: Dp = 1.dp,
     leadingIconImageVector: ImageVector = Icons.Outlined.Search
 ) {
-        // The primary Box that holds the OutlinedTextField
+    BoxWithConstraints {
+        val screenWidth = maxWidth
+        val screenHeight = maxHeight
+
+        // Adjust sizes based on screen width and height
+        val iconSize = (screenWidth / 20).coerceAtLeast(24.dp)  // Minimum 24.dp
+        val height = (screenHeight / 15).coerceAtLeast(50.dp)   // Minimum 50.dp
+        val elevation = 2.dp // Fixed low elevation for a subtle shadow
+
         Box(
             modifier = modifier
-                // Rounded corners for the container
                 .clip(RoundedCornerShape(cornerRadius))
-                // Use shadow with clip = false so the entire shadow is shown uniformly
+                .background(backgroundColor)
                 .shadow(
-                    elevation = 3.dp,  // Increase elevation for a more pronounced shadow
+                    elevation = elevation,
                     shape = RoundedCornerShape(cornerRadius),
-                    clip = true,
-                    ambientColor = Color.LightGray,   // You can change or remove these custom colors
-                    spotColor = Color.Gray
+                    clip = false
                 )
+                .padding(4.dp) // Padding outside the shadow for better visual effect
         ) {
             OutlinedTextField(
                 value = value,
                 onValueChange = onValueChange,
-                singleLine = true, // Keeps the text on a single line
+                singleLine = true,
                 modifier = Modifier
-                    .height(50.dp)
+                    .height(height)
                     .fillMaxWidth()
-                    // No additional background color needed, let it be transparent
-                    .background(Color.Transparent)
-                    .clip(RoundedCornerShape(cornerRadius)), // Match the corner radius
+                    .clip(RoundedCornerShape(cornerRadius))
+                    .background(backgroundColor),
                 placeholder = {
-                    // Vertically center the placeholder text
-                    Box(
-                        modifier = Modifier
-                            .fillMaxHeight()
-                            .wrapContentSize(Alignment.Center)
-                    ) {
-                        Text(
-                            text = placeholderText,
-                            textAlign = TextAlign.Center,
-                            fontSize = 12.sp,
-                            color = placeholderTextColor
-                        )
-                    }
+                    Text(
+                        text = placeholderText,
+                        fontSize = 12.sp,
+                        color = placeholderTextColor
+                    )
                 },
                 leadingIcon = {
-                    // Vertically center the icon
                     Box(
                         modifier = Modifier
                             .fillMaxHeight()
@@ -158,11 +95,10 @@ fun SearchBar(
                         Icon(
                             imageVector = leadingIconImageVector,
                             contentDescription = "Leading Icon",
-                            modifier = Modifier.size(24.dp)
+                            modifier = Modifier.size(iconSize)
                         )
                     }
                 },
-                // Remove the default indicator and background colors
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = Color.Transparent,
                     unfocusedContainerColor = Color.Transparent,
@@ -171,10 +107,11 @@ fun SearchBar(
                     unfocusedIndicatorColor = Color.Transparent,
                     disabledIndicatorColor = Color.Transparent
                 ),
-                // Center the typed text horizontally
-                textStyle = LocalTextStyle.current.copy(
-                    textAlign = TextAlign.Center
+                textStyle = TextStyle.Default.copy(
+                    fontSize = 12.sp,
+                    color = Color.Black
                 )
             )
         }
     }
+}
