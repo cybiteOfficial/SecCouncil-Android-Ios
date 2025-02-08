@@ -1,5 +1,6 @@
 package com.example.seccouncil.common
 
+import android.util.Log
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -30,10 +31,11 @@ fun ButtonComposable(
     contentColor:Color = Color.Black,
     fontSize:TextUnit = 20.sp,
     height:Dp = 50.dp,
-    fontWeight: FontWeight = FontWeight.Bold
+    fontWeight: FontWeight = FontWeight.Bold,
+    onClick:()->Unit = {}
 ){
     Button(
-        onClick = {},
+        onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = startPadding, end = endPadding)

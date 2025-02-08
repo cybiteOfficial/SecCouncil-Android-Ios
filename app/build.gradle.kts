@@ -56,6 +56,7 @@ dependencies {
     implementation(libs.androidx.annotation.jvm)
     implementation(libs.androidx.material3.android)
     implementation(libs.androidx.runtime.android)
+    implementation(libs.androidx.runtime.livedata)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -80,13 +81,16 @@ dependencies {
     implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
     implementation ("androidx.lifecycle:lifecycle-livedata:2.8.7")
 
-    // coil for image loading
-    implementation("io.coil-kt.coil3:coil-compose:3.0.4")
+    //coil
+    implementation("io.coil-kt:coil-compose:2.5.0")
 
     // Datastore Preference
     implementation("androidx.datastore:datastore-preferences:1.1.2")
 
     // country picker
     implementation("com.github.ahmmedrejowan:CountryCodePickerCompose:0.1")
+
+    // Razor pay
+    implementation ("com.razorpay:checkout:1.6.40")
 
 }
