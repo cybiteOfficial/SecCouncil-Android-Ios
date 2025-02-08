@@ -11,27 +11,27 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.seccouncil.R
+import coil.compose.rememberAsyncImagePainter
 import com.example.seccouncil.common.ButtonComm
 import com.example.seccouncil.common.EnrolledContent
 import com.example.seccouncil.common.RatingContent
-import com.example.seccouncil.common.SearchBar
 import com.example.seccouncil.common.TextComm
-
+import com.example.seccouncil.network.getAllCourseDetailsModel.Data
 
 @Preview(showSystemUi = true)
 @Composable
@@ -46,45 +46,52 @@ fun CourseScreen(
             .fillMaxSize()
             .padding(horizontal = 15.dp)
     ){
-//        Spacer(Modifier.height(16.dp))
-        SearchBar()
-        Spacer(Modifier.height(32.dp))
         Column(
-            modifier = Modifier.fillMaxSize()
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(24.dp),
-            horizontalAlignment = Alignment.Start
+            modifier = Modifier,
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            CourseContent()
-            CourseContent()
+                OnGoingCourses()
+                Text(
+                    text = "No Course Enrolled",
+                    fontSize = 20.sp,
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                )
         }
+
     }
 }
 
 
 @Preview(showBackground = true)
 @Composable
-private fun CourseContent(
-    img:Int = R.drawable.c0,
-    contentDescription:String = "Fundamentals of Cyber Security"
+fun CourseContent(
+    img2:String = "",
+    contentDescription:String = "Fundamentals of Cyber Security",
+    courseName:String = "",
+    price:String = ""
 ){
 Column(
     modifier = Modifier.fillMaxWidth(),
     horizontalAlignment = Alignment.Start
 ) {
-    Image(
-        painter = painterResource(img),
-        contentDescription = contentDescription,
-        modifier = Modifier
-//            .size(width = 343.dp, height = 175.dp)
-            .height(175.dp)
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(10.dp)),
-        contentScale = ContentScale.FillWidth
+    val painter = rememberAsyncImagePainter(
+        model = img2
     )
+    Image(
+        painter= painter,
+        contentDescription = "",
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(175.dp)
+            .clip(RoundedCornerShape(10.dp)),
+        contentScale = ContentScale.Crop
+    )
+
     Spacer(Modifier.height(16.dp))
     TextComm(
-        text = contentDescription,
+        text = courseName,
         fontWeight = FontWeight.SemiBold,
         lineHeight = 20.88.sp
     )
@@ -102,7 +109,56 @@ Column(
     }
     Spacer(Modifier.height(16.dp))
     ButtonComm(
-        text = "Rs 25,000/-"
+        text = price
     )
 }
+}
+
+@Composable
+private fun OnSuccessScreen(
+    modifier: Modifier = Modifier,
+    courseList:List<Data>
+){
+    LazyColumn(
+        modifier = modifier
+            .fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(24.dp),
+        horizontalAlignment = Alignment.Start
+    ) {
+        items(courseList){
+            course->
+            CourseContent(
+                img2 = course.thumbnail,
+                courseName = course.courseName,
+                price = course.price.toString()
+            )
+        }
+    }
+}
+
+@Composable
+private fun OnLoadingScreen(){
+    Column(
+            modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+            CircularProgressIndicator()
+    }
+}
+
+@Composable
+private fun OnErrorScreen(
+    message:String
+){
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = message,
+            fontSize = 18.sp
+        )
+    }
 }
