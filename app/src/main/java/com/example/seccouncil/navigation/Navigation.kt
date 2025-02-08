@@ -24,13 +24,11 @@ import com.example.seccouncil.screens.SignUpViewModelFactory
 import com.example.seccouncil.screens.homescreen.HomeScreen
 import com.example.seccouncil.screens.homescreen.HomescreenViewmodel
 import com.example.seccouncil.screens.homescreen.MyViewModelFactory
-import com.example.seccouncil.screens.profilesetting.ProfileSettingScreen
 import com.example.seccouncil.utlis.DataStoreManger
 import com.example.seccouncil.utlis.DataStoreManger.Companion.EMAIL
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.CoroutineScope
 
 @Composable
 fun Navigation(
@@ -41,7 +39,8 @@ fun Navigation(
     // Our custom DataStore manager
     dataStoreManger: DataStoreManger,
      context: Context,
-    scope:CoroutineScope
+    scope:CoroutineScope,
+    startRazorpayPayment:()->Unit
 ) {
     // Initialize ViewModel using factory pattern
     // This ViewModel handles sign-up related logic
@@ -143,7 +142,8 @@ fun Navigation(
             HomeScreen(
                 userDetails = dataStoreManger.getFromDataStore(),
                 profileViewmodel = homeViewmodel,
-                scope = scope
+                scope = scope,
+                startRazorpayPayment = startRazorpayPayment
             )
         }
     }
