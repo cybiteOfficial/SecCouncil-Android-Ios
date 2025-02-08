@@ -38,7 +38,7 @@ import androidx.compose.ui.text.style.TextMotion
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil3.compose.rememberAsyncImagePainter
+import coil.compose.rememberAsyncImagePainter
 import com.example.seccouncil.R
 import com.example.seccouncil.common.ProfileScreenSettingItem
 import com.example.seccouncil.common.TopAppBar
