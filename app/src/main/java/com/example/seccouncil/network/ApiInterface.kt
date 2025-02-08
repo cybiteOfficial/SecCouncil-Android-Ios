@@ -1,9 +1,14 @@
 package com.example.seccouncil.network
 
+import com.example.seccouncil.network.getAllCourseDetailsModel.GetAllCourse
+import com.example.seccouncil.network.getCourseDetail.GetCourseDetail
+import com.example.seccouncil.network.getCourseDetail.GetCourseDetailRequest
 import com.google.gson.annotations.SerializedName
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.Path
 
 // Define request data classes
 data class SignUpRequest(
@@ -81,15 +86,20 @@ data class LoginResponse(
 
 interface ApiInterface {
     // Send OTP API
-    @POST("sendotp")
+    @POST("/api/v1/auth/sendotp")
     suspend fun sendOtp(@Body request: EmailRequest): Response<OtpResponse>
 
     // Sign-Up API
-    @POST("signup")
+    @POST("/api/v1/auth/signup")
     suspend fun signUp(@Body request: SignUpRequest): Response<SignUpResponse>
 
     // Login API
-    @POST("login")
+    @POST("/api/v1/auth/login")
     suspend fun login(@Body request: LoginRequest): Response<LoginResponse>
 
+    @GET("/api/v1/course/getAllCourses")
+    suspend fun getAllCourses(): Response<GetAllCourse>
+
+    @POST("/api/v1/course/getCourseDetails")
+    suspend fun getCourseDetail(@Body request: GetCourseDetailRequest): Response<GetCourseDetail>
 }
