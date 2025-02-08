@@ -4,7 +4,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object ApiService {
-    private const val BASE_URL = "https://seccouncil.onrender.com/api/v1/auth/" // Replace with your API base URL
+    private const val BASE_URL = "https://seccouncil.onrender.com" // Replace with your API base URL
 
     // Create Retrofit instance
     private val retrofit: Retrofit by lazy {
