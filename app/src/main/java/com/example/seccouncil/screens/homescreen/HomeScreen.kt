@@ -1,5 +1,6 @@
 package com.example.seccouncil.screens.homescreen
 
+import android.icu.util.Currency
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -76,6 +77,7 @@ import com.example.seccouncil.screens.DownloadScreen
 import com.example.seccouncil.screens.profilesetting.ProfileScreen
 import com.example.seccouncil.screens.profilesetting.ProfileSettingScreen
 import com.example.seccouncil.ui.theme.urbanist
+import com.example.seccouncil.videoplayer.ResponsiveCourseDetailScreenOnPurchase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 
@@ -86,98 +88,110 @@ import kotlinx.coroutines.flow.Flow
 fun HomeScreen(
     userDetails: Flow<UserDetails>,
     profileViewmodel: HomescreenViewmodel,
-    scope: CoroutineScope,
-    startRazorpayPayment:()->Unit
+    scope: CoroutineScope
 ) {
-
     val navController1 = rememberNavController()
     val currentDestination = navController1.currentBackStackEntryAsState().value?.destination?.route
     val userDetail = userDetails.collectAsState(initial = null)
+    val getAllCourseResult = profileViewmodel.getAllCourseResult.collectAsState()
 
-    var getAllCourseResult = profileViewmodel.getAllCourseResult.collectAsState()
+    // State to track fullscreen mode
+    var isFullScreen by remember { mutableStateOf(false) }
+
     Scaffold(
-            modifier = Modifier
-                .fillMaxSize(),
-            topBar = {
-                if (currentDestination == "home") {
-                    TopAppBar(
-                        colors = TopAppBarDefaults.topAppBarColors(
-                            containerColor = Color.White, // Background color
-                            titleContentColor = Color.Black, // Title color
-                            actionIconContentColor = Color.Black, // Action icon color
-                            navigationIconContentColor = Color.Black // Navigation icon color
-                        ),
-                        title = {
-                            TopContent(
-                                name = userDetail.value?.name?:""
-                            )
-                        }
-                    )
-                }
-            },
-            containerColor = Color.White,
-            bottomBar = {
-                    BottomNavigationBar(navController = navController1)
+        modifier = Modifier.fillMaxSize(),
+        topBar = {
+            if (currentDestination == "home" && !isFullScreen) { // Hide top bar in fullscreen mode
+                TopAppBar(
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.White,
+                        titleContentColor = Color.Black,
+                        actionIconContentColor = Color.Black,
+                        navigationIconContentColor = Color.Black
+                    ),
+                    title = {
+                        TopContent(
+                            name = userDetail.value?.name ?: ""
+                        )
+                    }
+                )
             }
-        ) { innerPadding ->
-            NavHost(
-                navController = navController1,
-                startDestination = "home",
-                modifier = Modifier.padding(innerPadding)
-            ) {
-                composable("home") { ContentScreen(
+        },
+        containerColor = Color.White,
+        bottomBar = {
+            if (!isFullScreen) { // Hide bottom bar in fullscreen mode
+                BottomNavigationBar(navController = navController1)
+            }
+        }
+    ) { innerPadding ->
+        NavHost(
+            navController = navController1,
+            startDestination = "home",
+            modifier = Modifier.padding(innerPadding)
+        ) {
+            composable("home") {
+                ContentScreen(
                     onCourseClicked = { navController1.navigate("courseDetail") },
                     getAllCourseResult = getAllCourseResult,
-                    profileViewmodel =profileViewmodel,
+                    profileViewmodel = profileViewmodel,
                     navController = navController1
-                ) }
-                composable("courses") { CourseScreen(
-                    onBackClicked = { navController1.popBackStack() })
-                }
-                composable("profile") { ProfileScreen(
-                        onProfileClicked = {navController1.navigate("profileSetting")},
-                    name = userDetail.value?.name?:"",
-                    email = userDetail.value?.emailAddress?:"",
+                )
+            }
+            composable("courses") {
+                CourseScreen(onBackClicked = { navController1.popBackStack() })
+            }
+            composable("profile") {
+                ProfileScreen(
+                    onProfileClicked = { navController1.navigate("profileSetting") },
+                    name = userDetail.value?.name ?: "",
+                    email = userDetail.value?.emailAddress ?: "",
                     viewModel = profileViewmodel,
                     scope = scope
-
-                ) }
-                composable("downloads"){ DownloadScreen(
-
                 )
-                }
-                composable("profileSetting"){
-                    ProfileSettingScreen(
-                        name = userDetail.value?.name?:"",
-                        email = userDetail.value?.emailAddress?:"",
-                        phoneNumber = userDetail.value?.mobileNumber?:"",
-                        viewModel = profileViewmodel,
-                        scope = scope
-                    )
-                }
-                composable("courseDetail/{courseId}"){backStackEntry ->
-                    val courseId = backStackEntry.arguments?.getString("courseId") ?: return@composable
-
-                    ResponsiveCourseDetailScreen(
-                        courseId = courseId,
-                        onClick = { navController1.popBackStack() },
-                        onBuy = startRazorpayPayment,
-                        profileViewmodel = profileViewmodel
-                    )
-                }
+            }
+            composable("downloads") {
+                DownloadScreen()
+            }
+            composable("profileSetting") {
+                ProfileSettingScreen(
+                    name = userDetail.value?.name ?: "",
+                    email = userDetail.value?.emailAddress ?: "",
+                    phoneNumber = userDetail.value?.mobileNumber ?: "",
+                    viewModel = profileViewmodel,
+                    scope = scope
+                )
+            }
+            composable("courseDetail/{courseId}") { backStackEntry ->
+                val courseId = backStackEntry.arguments?.getString("courseId") ?: return@composable
+                ResponsiveCourseDetailScreen(
+                    navController = navController1,
+                    courseId = courseId,
+                    onClick = { navController1.popBackStack() },
+                    profileViewmodel = profileViewmodel,
+                    email = userDetail.value?.emailAddress ?: "",
+                    phone = userDetail.value?.mobileNumber ?: ""
+                )
+            }
+            composable("onPurchasedScreen") {
+                ResponsiveCourseDetailScreenOnPurchase(
+                    videoUri = "https://storage.googleapis.com/exoplayer-test-media-0/BigBuckBunny_320x180.mp4",
+                    isFullScreen = isFullScreen,
+                    onFullScreenToggle = { newValue -> isFullScreen = newValue }
+                )
             }
         }
     }
+}
 
 @Composable
 fun BottomNavigationBar(
     navController: NavController
 ) {
     val navItemList = listOf(
-        NavItem("Home", icon = R.drawable.home), // Replace with your icons
+        NavItem("Home", icon = R.drawable.outline_home_24), // Replace with your icons
         NavItem("Courses", icon = R.drawable.school),
         NavItem("Downloads", icon = R.drawable.download),
-        NavItem("Profile", icon = R.drawable.profile)
+        NavItem("Profile", icon = R.drawable.outline_person_24)
     )
     val currentRoute = navController.currentBackStackEntry?.destination?.route
 
@@ -264,7 +278,10 @@ fun ContentScreen(
                 if (courseList.isNullOrEmpty()) {
                     OnError("No courses found.")
                 } else {
-                           LazyColumn {
+                           LazyColumn(
+                               modifier = Modifier,
+                               verticalArrangement = Arrangement.spacedBy(8.dp)
+                           ) {
                                items(courseList){
                                    course->
                                    CourseContent2(
@@ -304,7 +321,8 @@ private fun TopContent(
 ){
    // val userDetails by dataStoreManger.getFromDataStore().collectAsState(initial = null)
     Row(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
             .padding(end = 15.dp)
             .background(Color.White),
         verticalAlignment = Alignment.CenterVertically,
@@ -339,7 +357,8 @@ private fun TopContent(
             Icon(
                 imageVector = Icons.Outlined.Notifications,
                 contentDescription = "Notification",
-                modifier = Modifier.size(30.dp)
+                modifier = Modifier
+                    .size(30.dp)
                     .clickable { onBellClicked() }
             )
         }
@@ -355,13 +374,14 @@ private fun TopContent(
 ){
 
     Card(
-        modifier = modifier.wrapContentWidth()
+        modifier = modifier
+            .wrapContentWidth()
             .clip(RoundedCornerShape(5.dp))
             .background(
                 Brush.linearGradient(
                     colors = listOf(Color(0xFF4776E6), Color(0xFF20408B)),
-                    start = Offset(0f,0f),
-                    end = Offset(100f,1100f)
+                    start = Offset(0f, 0f),
+                    end = Offset(100f, 1100f)
                 ),
             ),
         colors = CardDefaults.cardColors(containerColor = Color.Transparent,
@@ -369,7 +389,8 @@ private fun TopContent(
 
     ){
         Column(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .padding(16.dp),
             horizontalAlignment = Alignment.Start
         ) {
@@ -534,6 +555,7 @@ fun CourseContent2(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(175.dp)
+                .clickable { onClick() }
                 .clip(RoundedCornerShape(10.dp)),
             contentScale = ContentScale.Crop
         )
@@ -562,8 +584,10 @@ fun CourseContent2(
 
         }
         Spacer(Modifier.height(16.dp))
+
+        val rupeeSymbol = Currency.getInstance(java.util.Locale("en", "IN")).symbol
         ButtonComm(
-            text = price,
+            text = "Buy at $rupeeSymbol$price",
             onClick = onClick
         )
     }
