@@ -1,9 +1,6 @@
 package com.example.seccouncil
 
 import android.app.Activity
-import android.content.Context
-import android.net.ConnectivityManager
-import android.net.Network
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -17,10 +14,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.compose.rememberNavController
 import com.example.seccouncil.navigation.Navigation
 import com.example.seccouncil.payment_gateway.PaymentDetails
 import com.example.seccouncil.screens.SplashViewModel
-import com.example.seccouncil.screens.homescreen.HomescreenViewmodel
 import com.example.seccouncil.ui.theme.SecCouncilTheme
 import com.example.seccouncil.utlis.DataStoreManger
 import com.example.seccouncil.utlis.preferenceDataStore
@@ -51,8 +48,8 @@ class MainActivity : ComponentActivity(),PaymentResultWithDataListener {
                    preferenceDataStore =  preferenceDataStore,
                    dataStoreManger =  dataStoreManger,
                     context = dataStoreContext,
-                    scope = lifecycleScope,
-                    startRazorpayPayment = {startRazorpayPayment()}
+                    scope = lifecycleScope
+//                    startRazorpayPayment = {startRazorpayPayment()}
                 )
             }
         }
@@ -61,7 +58,11 @@ class MainActivity : ComponentActivity(),PaymentResultWithDataListener {
         * call this method as early as possible in your checkout flow
         * */
     }
-    private fun startRazorpayPayment() {
+    fun startRazorpayPayment(
+        coursePrice: Int,
+        email:String = "",
+        phone:String = ""
+    ) {
         Log.i("INSIDE","razorpay")
         // apart from setting it in AndroidManifest.xml, keyId can also be set
         // programmatically during runtime
@@ -78,7 +79,9 @@ class MainActivity : ComponentActivity(),PaymentResultWithDataListener {
             options.put("theme.color", "#38B6FF");
             options.put("currency","INR");
             //  options.put("order_id", "order_DBJOWzybf0sJbb");
-            options.put("amount","50000")//pass amount in currency subunits
+            // Convert price to paisa (Razorpay requires the amount in the smallest currency unit)
+            val amountInPaisa = coursePrice * 100
+            options.put("amount", amountInPaisa.toString())
 
             val retryObj = JSONObject();
             retryObj.put("enabled", true);
@@ -86,8 +89,8 @@ class MainActivity : ComponentActivity(),PaymentResultWithDataListener {
             options.put("retry", retryObj);
 
             val prefill = JSONObject()
-            prefill.put("email","gaurav.kumar@example.com")
-            prefill.put("contact","9876543210")
+            prefill.put("email",email)
+            prefill.put("contact",phone)
 
             options.put("prefill",prefill)
             co.open(activity,options)
@@ -97,6 +100,7 @@ class MainActivity : ComponentActivity(),PaymentResultWithDataListener {
         }
     }
     override fun onPaymentSuccess(paymentId: String?, paymentData: PaymentData?) {
+        payment_done = true
         paymentDetails = paymentDetails.copy(paymentId = paymentId, orderId = paymentData?.orderId)
         Toast.makeText(this, "Payment Successful: $paymentId", Toast.LENGTH_LONG).show()
         // Handle payment success logic here
