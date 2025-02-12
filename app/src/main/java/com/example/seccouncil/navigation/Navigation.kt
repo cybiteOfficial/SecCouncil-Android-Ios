@@ -39,8 +39,8 @@ fun Navigation(
     // Our custom DataStore manager
     dataStoreManger: DataStoreManger,
      context: Context,
-    scope:CoroutineScope,
-    startRazorpayPayment:()->Unit
+    scope:CoroutineScope
+//    startRazorpayPayment:()->Unit
 ) {
     // Initialize ViewModel using factory pattern
     // This ViewModel handles sign-up related logic
@@ -142,8 +142,8 @@ fun Navigation(
             HomeScreen(
                 userDetails = dataStoreManger.getFromDataStore(),
                 profileViewmodel = homeViewmodel,
-                scope = scope,
-                startRazorpayPayment = startRazorpayPayment
+                scope = scope
+//                startRazorpayPayment = startRazorpayPayment
             )
         }
     }
