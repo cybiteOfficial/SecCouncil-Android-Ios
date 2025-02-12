@@ -4,7 +4,6 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -31,6 +30,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -38,25 +38,38 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
+import com.example.seccouncil.MainActivity
 import com.example.seccouncil.common.ButtonComposable
 import com.example.seccouncil.common.EnrolledContent
 import com.example.seccouncil.common.RatingContent
-import com.example.seccouncil.common.TextComm
 import com.example.seccouncil.common.TopAppBar
 import com.example.seccouncil.network.getAllCourseDetailsModel.NetworkResponse
+import com.example.seccouncil.payment_done
 import com.example.seccouncil.payment_gateway.PaymentDetails
+import com.example.seccouncil.utlis.DataStoreManger
 
 
-@Preview(showSystemUi = true)
 @Composable
 fun ResponsiveCourseDetailScreen(
+    navController:NavController,
     courseId: String="",
     onClick: () -> Unit = {},
     paymentDetails: PaymentDetails = PaymentDetails("", "", 0),
-    onBuy: () -> Unit = {},
-    profileViewmodel: HomescreenViewmodel
+//    onBuy: () -> Unit = {},
+    profileViewmodel: HomescreenViewmodel,
+    email:String = "",
+    phone:String = ""
 ) {
+    val context = LocalContext.current
+    val dataStoreHelper = remember { DataStoreManger(context) }
+
+    var isPurchased by remember { mutableStateOf(false) }
+
+//    LaunchedEffect(courseId) {
+//        isPurchased = dataStoreHelper.isCoursePurchased(courseId)
+//    }
 
     // Fetch course details using API
     val courseDetailResult by profileViewmodel.getCourseDetailResult.collectAsState()
@@ -145,6 +158,7 @@ fun ResponsiveCourseDetailScreen(
                             )
 
                             Spacer(Modifier.height(16.dp))
+                            val context = LocalContext.current
 
                             // Buy Button
                             ButtonComposable(
@@ -156,7 +170,18 @@ fun ResponsiveCourseDetailScreen(
                                 fontSize = with(density) { (textSize * 0.85f).toSp() },
                                 height = buttonHeight,
                                 fontWeight = FontWeight.SemiBold,
-                                onClick = onBuy
+                                onClick = {
+                                    if(payment_done){
+                                            navController.navigate("onPurchasedScreen")
+                                    }else{
+                                        (context as? MainActivity)?.startRazorpayPayment(
+                                            coursePrice =  courseDetail.courseDetails.price,
+                                            email = email,
+                                            phone = phone,
+
+                                        )
+                                    }
+                                }
                             )
                         }
                     }
@@ -173,22 +198,26 @@ fun ResponsiveCourseDetailScreen(
 
 }
 
+@Preview(showSystemUi = true)
 @Composable
 fun ExpandableCard(
+    modifier: Modifier = Modifier,
     title: String,
     content: String,
     isExpanded: Boolean,
     onExpandToggle: () -> Unit,
-    maxLines: Int
+    maxLines: Int,
+    verticalPadding: Dp = 10.dp,
+    horizontalPadding:Dp = 5.dp
 ) {
     Card(
         modifier = Modifier
-            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
             .animateContentSize(),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Column(modifier = Modifier.padding(vertical = 10.dp, horizontal = 5.dp)) {
+        Column(modifier = modifier.padding(vertical = verticalPadding, horizontal = horizontalPadding)) {
             Text(
                 text = title,
                 fontSize = 18.sp,
@@ -211,45 +240,6 @@ fun ExpandableCard(
                     .align(Alignment.End)
                     .clickable { onExpandToggle() }
                     .padding(vertical = 4.dp)
-            )
-        }
-    }
-}
-@Composable
-fun ResponsiveCourseDetailContent(
-    id: Int = 1,
-    title: String = "Getting Started",
-    time: Int = 10,
-    textSize: Dp = 16.dp
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(10.dp))
-            .border(
-                width = 1.dp,
-                color = Color.DarkGray,
-                shape = RoundedCornerShape(12.dp)
-            )
-    ){
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            TextComm(
-                // Convert DP to sp for text size
-                text = "$id.  $title",
-                fontSize = with(LocalDensity.current) { textSize.toSp() },
-                lineHeight = with(LocalDensity.current) { textSize.toSp() }
-            )
-            Spacer(Modifier.weight(1f))
-            TextComm(
-                text = "$time Mins",
-                fontSize = with(LocalDensity.current) { (textSize * 0.8f).toSp() },
-                lineHeight = with(LocalDensity.current) { textSize.toSp() },
-                color = Color.Gray
             )
         }
     }
