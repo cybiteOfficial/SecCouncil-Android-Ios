@@ -11,6 +11,7 @@
 
     <application
         android:allowBackup="true"
+        android:hardwareAccelerated="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
@@ -19,13 +20,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SecCouncil"
         tools:targetApi="31">
-<!--        <meta-data-->
-<!--            android:name="com.razorpay.API_KEY"-->
-<!--            android:value="rzp_test_CrYIryTQfdmHwu" />-->
 
-<!--        <activity android:name=".payment_gateway.PaymentActivity" />-->
         <activity
             android:name=".MainActivity"
+            android:configChanges="orientation|screenSize"
+            android:hardwareAccelerated="true"
             android:exported="true"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
