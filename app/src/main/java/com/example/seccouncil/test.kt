@@ -95,3 +95,5 @@ fun CustomSearchBarPreview() {
         CustomSearchBar()
     }
 }
+
+var payment_done:Boolean = true
