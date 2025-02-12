@@ -1,8 +1,11 @@
 package com.example.seccouncil.common
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -50,68 +53,84 @@ fun ResponsiveSearchBar(
     strokeWidth: Dp = 1.dp,
     leadingIconImageVector: ImageVector = Icons.Outlined.Search
 ) {
-    BoxWithConstraints {
-        val screenWidth = maxWidth
-        val screenHeight = maxHeight
-
-        // Adjust sizes based on screen width and height
-        val iconSize = (screenWidth / 20).coerceAtLeast(24.dp)  // Minimum 24.dp
-        val height = (screenHeight / 15).coerceAtLeast(50.dp)   // Minimum 50.dp
-        val elevation = 2.dp // Fixed low elevation for a subtle shadow
-
-        Box(
-            modifier = modifier
-                .clip(RoundedCornerShape(cornerRadius))
-                .background(backgroundColor)
-                .shadow(
-                    elevation = elevation,
-                    shape = RoundedCornerShape(cornerRadius),
-                    clip = false
-                )
-                .padding(4.dp) // Padding outside the shadow for better visual effect
-        ) {
-            OutlinedTextField(
-                value = value,
-                onValueChange = onValueChange,
-                singleLine = true,
-                modifier = Modifier
-                    .height(height)
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(cornerRadius))
-                    .background(backgroundColor),
-                placeholder = {
-                    Text(
-                        text = placeholderText,
-                        fontSize = 12.sp,
-                        color = placeholderTextColor
+        BoxWithConstraints(
+            modifier =
+                Modifier
+                    .shadow(
+                        elevation = 5.dp,
+                        shape = RoundedCornerShape(12.dp),
+                        ambientColor = Color.LightGray,
+                        spotColor = Color.DarkGray
                     )
-                },
-                leadingIcon = {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxHeight()
-                            .wrapContentSize(Alignment.Center)
-                    ) {
-                        Icon(
-                            imageVector = leadingIconImageVector,
-                            contentDescription = "Leading Icon",
-                            modifier = Modifier.size(iconSize)
+                    .border(
+                        width = 1.dp,
+                        color = Color.White, // ✅ Adds a light border for better distinction
+                        shape = RoundedCornerShape(12.dp),
+                    )
+                    .clip(RoundedCornerShape(12.dp)) // Clip corners to match shadow shape
+                    .background(
+                        color = Color.White,
+                        shape = RoundedCornerShape(12.dp)) // Background color of the Box
+        ) {
+            val screenWidth = maxWidth
+            val screenHeight = maxHeight
+
+            // Adjust sizes based on screen width and height
+            val iconSize = (screenWidth / 20).coerceAtLeast(24.dp)  // Minimum 24.dp
+            val height = (screenHeight / 15).coerceAtLeast(50.dp)   // Minimum 50.dp
+            Box(
+                modifier = modifier
+                    .clip(RoundedCornerShape(cornerRadius))
+                    .background(Color.White)
+                    .shadow(
+                        elevation = 0.dp,
+                        shape = RoundedCornerShape(cornerRadius),
+                        clip = true
+                    )
+                    .padding(4.dp) // Padding outside the shadow for better visual effect
+            ) {
+                OutlinedTextField(
+                    value = value,
+                    onValueChange = onValueChange,
+                    singleLine = true,
+                    modifier = Modifier
+                        .height(height)
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(cornerRadius))
+                        .background(Color.White),
+                    placeholder = {
+                        Text(
+                            text = placeholderText,
+                            fontSize = 12.sp,
+                            color = placeholderTextColor
                         )
-                    }
-                },
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color.Transparent,
-                    unfocusedContainerColor = Color.Transparent,
-                    disabledContainerColor = Color.Transparent,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    disabledIndicatorColor = Color.Transparent
-                ),
-                textStyle = TextStyle.Default.copy(
-                    fontSize = 12.sp,
-                    color = Color.Black
+                    },
+                    leadingIcon = {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .wrapContentSize(Alignment.Center)
+                        ) {
+                            Icon(
+                                imageVector = leadingIconImageVector,
+                                contentDescription = "Leading Icon",
+                                modifier = Modifier.size(iconSize)
+                            )
+                        }
+                    },
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        disabledContainerColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        disabledIndicatorColor = Color.Transparent
+                    ),
+                    textStyle = TextStyle.Default.copy(
+                        fontSize = 12.sp,
+                        color = Color.Black
+                    )
                 )
-            )
+            }
         }
     }
-}
