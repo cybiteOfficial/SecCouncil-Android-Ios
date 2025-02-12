@@ -93,4 +93,7 @@ dependencies {
     // Razor pay
     implementation ("com.razorpay:checkout:1.6.40")
 
+    //exo player
+    implementation ("com.google.android.exoplayer:exoplayer:2.19.1")
+
 }
