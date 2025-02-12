@@ -57,13 +57,6 @@ fun RatingContent(
             text = level,
             fontSize = 12.sp
         )
-        Surface(
-            modifier = Modifier
-                .size(4.dp)
-                .background(Color.Gray, shape = RoundedCornerShape(8.dp)),
-            shape = RoundedCornerShape(8.dp),
-            color = Color.Transparent
-        ){}
         Icon(
             imageVector = Icons.Filled.Star,
             contentDescription = null,
@@ -101,14 +94,14 @@ fun EnrolledContent(
         )
         Spacer(Modifier.width(20.dp))
         EnrollSubContent(
-            icon = R.drawable.lessons,
+            icon = R.drawable.material_symbols_menu_book_outline,
             subject = "14 Lessons",
             tint = tint
         )
         if(showEnroll){
             Spacer(Modifier.width(20.dp))
             EnrollSubContent(
-                icon = R.drawable.users,
+                icon = R.drawable.people,
                 subject = "Enrolled",
                 tint = tint
             )
