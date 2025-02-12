@@ -6,10 +6,12 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.example.seccouncil.model.UserDetails
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.first
 
 
 // Define a constant for the name of our DataStore
@@ -33,6 +35,7 @@ class DataStoreManger(val context: Context) {
         val MOBILE_NUMBER = stringPreferencesKey("PHONE")
         val NAME = stringPreferencesKey("NAME")
         val IMAGE_FILE_NAME = stringPreferencesKey("image_file_name")
+        private val PURCHASED_COURSES_KEY = stringSetPreferencesKey("purchased_courses")
     }
 
     // Suspend function to save user details to DataStore
@@ -95,5 +98,23 @@ class DataStoreManger(val context: Context) {
             // `preferences.remove(IMAGE_FILE_NAME)` removes the value associated with the key.
             preferences.remove(IMAGE_FILE_NAME)
         }
+    }
+
+
+    // Save Purchased Course ID
+    suspend fun savePurchasedCourse(courseId: String) {
+        context.preferenceDataStore.edit { preferences ->
+            val updatedCourses = preferences[PURCHASED_COURSES_KEY]?.toMutableSet() ?: mutableSetOf()
+            updatedCourses.add(courseId)
+            preferences[PURCHASED_COURSES_KEY] = updatedCourses
+        }
+    }
+
+    // Check if a Course is Purchased
+    suspend fun isCoursePurchased(courseId: String): Boolean {
+        val courses = context.preferenceDataStore.data.map { preferences ->
+            preferences[PURCHASED_COURSES_KEY] ?: emptySet()
+        }.first() // Get the first value from the Flow
+        return courseId in courses
     }
 }
