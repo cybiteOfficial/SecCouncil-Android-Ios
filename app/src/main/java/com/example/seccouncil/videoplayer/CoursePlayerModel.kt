@@ -35,28 +35,28 @@ data class VideoItem(
             videoId = "video2",
             title = "Module 1: Basics",
             description = "Fundamental concepts",
-            videoUrl = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+            videoUrl = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
             durationSeconds = 300f
         ),
         VideoItem(
             videoId = "video3",
             title = "Module 2: Intermediate",
             description = "Intermediate concepts",
-            videoUrl = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+            videoUrl = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
             durationSeconds = 450f
         ),
         VideoItem(
             videoId = "video4",
             title = "Module 3: Advanced",
             description = "Advanced concepts",
-            videoUrl = "https://example.com/video4.mp4",
+            videoUrl = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
             durationSeconds = 600f
         ),
         VideoItem(
             videoId = "video5",
             title = "Conclusion and Next Steps",
             description = "Summary and further learning",
-            videoUrl = "https://example.com/video5.mp4",
+            videoUrl = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
             durationSeconds = 180f
         )
     )

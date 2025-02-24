@@ -96,4 +96,3 @@ fun CustomSearchBarPreview() {
     }
 }
 
-var payment_done:Boolean = true

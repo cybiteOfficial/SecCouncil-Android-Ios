@@ -1,14 +1,24 @@
 package com.example.seccouncil.network
 
+import com.example.seccouncil.network.capturePayment.capturePaymentResponseX
 import com.example.seccouncil.network.getAllCourseDetailsModel.GetAllCourse
 import com.example.seccouncil.network.getCourseDetail.GetCourseDetail
 import com.example.seccouncil.network.getCourseDetail.GetCourseDetailRequest
+import com.example.seccouncil.network.getEnrolledCourse.EnrolledCourse
+import com.example.seccouncil.network.getFullCourseDetails.getFullCourseDetailResponse
+import com.example.seccouncil.network.getUserDetails.UserDetailsResponse
+import com.example.seccouncil.network.updateProfilePicture.UpdateProfilePictureResponse
+import com.example.seccouncil.network.verifyPaymentRequest.verifyPaymentRequest
 import com.google.gson.annotations.SerializedName
+import okhttp3.MultipartBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.Header
+import retrofit2.http.Multipart
 import retrofit2.http.POST
-import retrofit2.http.Path
+import retrofit2.http.PUT
+import retrofit2.http.Part
 
 // Define request data classes
 data class SignUpRequest(
@@ -84,6 +94,20 @@ data class LoginResponse(
     val message: String
 )
 
+data class CapturePaymentRequest(
+    val courses: List<String>
+)
+
+data class verifyPaymentResponse(
+    val success: Boolean,
+    val message: String
+)
+
+data class CourseRequest(
+    val courseId: String
+)
+
+
 interface ApiInterface {
     // Send OTP API
     @POST("/api/v1/auth/sendotp")
@@ -102,4 +126,39 @@ interface ApiInterface {
 
     @POST("/api/v1/course/getCourseDetails")
     suspend fun getCourseDetail(@Body request: GetCourseDetailRequest): Response<GetCourseDetail>
+
+    @GET("/api/v1/profile/getUserDetails")
+    suspend fun getUserDetails(@Header("Authorization") authHeader: String): Response<UserDetailsResponse>
+
+    @Multipart
+    @PUT("/api/v1/profile/updateDisplayPicture")
+    suspend fun updateDisplayPicture(
+        @Header("Authorization") authHeader: String,
+        @Part displayPicture: MultipartBody.Part
+    ): Response<UpdateProfilePictureResponse>
+
+    @POST("/api/v1/payment/capturePayment")
+    suspend fun capturePayment(
+        @Header("Authorization") authHeader: String,
+        @Body request: CapturePaymentRequest
+    ): Response<capturePaymentResponseX>
+
+    @GET("/api/v1/profile/getEnrolledCourses")
+    suspend fun getEnrolledCourse(
+        @Header("Authorization") authHeader: String
+    ):Response<EnrolledCourse>
+
+
+    @POST("/api/v1/payment/verifyPayment")
+    suspend fun verifyPayment(
+        @Header("Authorization") authHeader: String,
+        @Body request : verifyPaymentRequest
+    ):Response<verifyPaymentResponse>
+
+    @POST("/api/v1/course/getFullCourseDetails")
+    suspend fun getFullCourseDetail(
+        @Header("Authorization") authHeader: String,
+        @Body request : CourseRequest
+    ):Response<getFullCourseDetailResponse>
+
 }

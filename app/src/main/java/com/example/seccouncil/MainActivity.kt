@@ -14,9 +14,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.compose.rememberNavController
 import com.example.seccouncil.navigation.Navigation
 import com.example.seccouncil.payment_gateway.PaymentDetails
+import com.example.seccouncil.payment_gateway.PaymentViewModel
 import com.example.seccouncil.screens.SplashViewModel
 import com.example.seccouncil.ui.theme.SecCouncilTheme
 import com.example.seccouncil.utlis.DataStoreManger
@@ -24,11 +24,15 @@ import com.example.seccouncil.utlis.preferenceDataStore
 import com.razorpay.Checkout
 import com.razorpay.PaymentData
 import com.razorpay.PaymentResultWithDataListener
+import kotlinx.coroutines.launch
 import org.json.JSONObject
 
 class MainActivity : ComponentActivity(),PaymentResultWithDataListener {
     private var paymentDetails by mutableStateOf(PaymentDetails(null, null, 250000))
     private val viewModel: SplashViewModel by viewModels()
+    private val paymentViewModel:PaymentViewModel by viewModels()
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
@@ -37,9 +41,6 @@ class MainActivity : ComponentActivity(),PaymentResultWithDataListener {
         splashScreen.setKeepOnScreenCondition{viewModel.isLoading.value}
         setContent {
             Checkout.preload(applicationContext)
-            val co = Checkout()
-            co.setKeyID("rzp_test_CrYIryTQfdmHwu")
-            co.setImage(R.drawable.app_icon)
 
             SecCouncilTheme {
                 val dataStoreContext = LocalContext.current
@@ -48,8 +49,8 @@ class MainActivity : ComponentActivity(),PaymentResultWithDataListener {
                    preferenceDataStore =  preferenceDataStore,
                    dataStoreManger =  dataStoreManger,
                     context = dataStoreContext,
-                    scope = lifecycleScope
-//                    startRazorpayPayment = {startRazorpayPayment()}
+                    scope = lifecycleScope,
+                    paymentViewModel = paymentViewModel
                 )
             }
         }
@@ -58,56 +59,54 @@ class MainActivity : ComponentActivity(),PaymentResultWithDataListener {
         * call this method as early as possible in your checkout flow
         * */
     }
-    fun startRazorpayPayment(
-        coursePrice: Int,
-        email:String = "",
-        phone:String = ""
-    ) {
-        Log.i("INSIDE","razorpay")
-        // apart from setting it in AndroidManifest.xml, keyId can also be set
-        // programmatically during runtime
-
-        val activity: Activity = this
-        val co = Checkout()
-
-        try {
-            val options = JSONObject()
-            options.put("name","SecCouncil")
-            options.put("description","Course Payment")
-            //You can omit the image option to fetch the image from the Dashboard
-            options.put("image","http://example.com/image/rzp.jpg")
-            options.put("theme.color", "#38B6FF");
-            options.put("currency","INR");
-            //  options.put("order_id", "order_DBJOWzybf0sJbb");
-            // Convert price to paisa (Razorpay requires the amount in the smallest currency unit)
-            val amountInPaisa = coursePrice * 100
-            options.put("amount", amountInPaisa.toString())
-
-            val retryObj = JSONObject();
-            retryObj.put("enabled", true);
-            retryObj.put("max_count", 4);
-            options.put("retry", retryObj);
-
-            val prefill = JSONObject()
-            prefill.put("email",email)
-            prefill.put("contact",phone)
-
-            options.put("prefill",prefill)
-            co.open(activity,options)
-        }catch (e: Exception){
-            Toast.makeText(activity,"Error in payment: "+ e.message,Toast.LENGTH_LONG).show()
-            e.printStackTrace()
-        }
-    }
     override fun onPaymentSuccess(paymentId: String?, paymentData: PaymentData?) {
-        payment_done = true
-        paymentDetails = paymentDetails.copy(paymentId = paymentId, orderId = paymentData?.orderId)
-        Toast.makeText(this, "Payment Successful: $paymentId", Toast.LENGTH_LONG).show()
-        // Handle payment success logic here
+//        payment_done = false
+//        paymentDetails = paymentDetails.copy(paymentId = paymentId, orderId = paymentData?.orderId)
+//        Toast.makeText(this, "Payment Successful: $paymentId", Toast.LENGTH_LONG).show()
+//        // Handle payment success logic here
+//        Log.e("Payment_status","$paymentId, ${paymentData?.orderId}")
+//        Log.e("Payment_status","$paymentId, ${paymentData?.signature}")
+//        if (paymentId != null) {
+//            paymentViewModel.handlePaymentSuccess(paymentId)
+//        }
+
+        Log.e("Payment_status","$paymentId, ${paymentData?.orderId}")
+
+
+        if (paymentId != null) {
+            paymentViewModel.handlePaymentSuccess(paymentId)
+
+            // ✅ Get stored course ID
+            val courseId = paymentViewModel.selectedCourseId.value ?: ""
+
+            if (courseId.isNotEmpty()) {
+                Log.e("CH1","$courseId")
+                // ✅ Call API to verify payment and enroll user
+                lifecycleScope.launch {
+                    val verifyResponse = paymentData?.let {
+                        paymentViewModel.verifyUserPayment(
+                            orderId = it.orderId,
+                            paymentId = paymentId,
+                            signature = it.signature,
+                            courses = listOf(courseId),
+                            context = applicationContext
+                        )
+                    }
+                    Log.e("CH1","$verifyResponse")
+                    if (verifyResponse != null) {
+                        Toast.makeText(this@MainActivity, "Payment Successful! Course Enrolled.", Toast.LENGTH_LONG).show()
+                    } else {
+                        Toast.makeText(this@MainActivity, "Payment Verified, but Enrollment Failed!", Toast.LENGTH_LONG).show()
+                    }
+                }
+            } else {
+                Toast.makeText(this@MainActivity, "Error: Course ID Missing!", Toast.LENGTH_LONG).show()
+            }
+        }
     }
 
     override fun onPaymentError(code: Int, response: String?, paymentData: PaymentData?) {
-        Toast.makeText(this, "Payment Failed: $response", Toast.LENGTH_LONG).show()
-        // Handle payment error logic here
+        Log.e("Payment Error", "Code: $code, Response: $response, OrderId: ${paymentData?.orderId}")
+        paymentViewModel.handlePaymentError(code, response ?: "Unknown error")
     }
 }

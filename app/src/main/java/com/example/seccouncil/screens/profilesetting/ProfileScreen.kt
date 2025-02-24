@@ -101,13 +101,6 @@ fun ProfileScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Spacer(modifier = Modifier.weight(1f)) // Push the icon to the end
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            modifier = Modifier
-                                .size(width = 21.dp, height = 28.dp),
-                            contentDescription = "Add More Option"
-                        )
-
                     }
                 },
                 navigationIcon = {
@@ -142,11 +135,12 @@ fun ProfileScreen(
                         .clip(RoundedCornerShape(10.dp))
                 ){
 
-                    if (isLoading) {
-                        // Show spinner if still loading from DataStore
-                        CircularProgressIndicator(Modifier.align(Alignment.Center))
-                    } else if (!imageFileName.isNullOrEmpty()) {
+                   if (!imageFileName.isNullOrEmpty()) {
                         // Display the image saved to internal storage
+                       if (isLoading) {
+                           // Show spinner if still loading from DataStore
+                           CircularProgressIndicator(Modifier.align(Alignment.Center))
+                       }else{
                         Image(
                             painter = rememberAsyncImagePainter(
                                 File(context.filesDir, imageFileName!!)
@@ -157,7 +151,8 @@ fun ProfileScreen(
                                 .clip(CircleShape),
                             contentScale = ContentScale.Crop
                         )
-                    } else {
+                    }
+                   } else {
                         // Show a default image if no filename stored
                         Image(
                             painter = painterResource(R.drawable.profilepic),

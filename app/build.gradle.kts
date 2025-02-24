@@ -91,9 +91,15 @@ dependencies {
     implementation("com.github.ahmmedrejowan:CountryCodePickerCompose:0.1")
 
     // Razor pay
-    implementation ("com.razorpay:checkout:1.6.40")
+    implementation ("com.razorpay:checkout:1.6.41")
 
     //exo player
     implementation ("com.google.android.exoplayer:exoplayer:2.19.1")
+
+    // OkHttp for HTTP operations
+    implementation ("com.squareup.okhttp3:okhttp:4.12.0")
+
+    // JWT decoding library
+    implementation ("com.auth0:java-jwt:3.10.3")
 
 }

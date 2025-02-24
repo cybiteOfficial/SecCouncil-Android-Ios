@@ -1,6 +1,8 @@
 package com.example.seccouncil.screens.homescreen
 
+import android.icu.util.Calendar
 import android.icu.util.Currency
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -37,6 +39,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -57,6 +60,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -73,6 +77,8 @@ import com.example.seccouncil.common.TextComm
 import com.example.seccouncil.model.UserDetails
 import com.example.seccouncil.network.getAllCourseDetailsModel.GetAllCourse
 import com.example.seccouncil.network.getAllCourseDetailsModel.NetworkResponse
+import com.example.seccouncil.network.getEnrolledCourse.EnrolledCourse
+import com.example.seccouncil.payment_gateway.PaymentViewModel
 import com.example.seccouncil.screens.DownloadScreen
 import com.example.seccouncil.screens.profilesetting.ProfileScreen
 import com.example.seccouncil.screens.profilesetting.ProfileSettingScreen
@@ -88,12 +94,14 @@ import kotlinx.coroutines.flow.Flow
 fun HomeScreen(
     userDetails: Flow<UserDetails>,
     profileViewmodel: HomescreenViewmodel,
-    scope: CoroutineScope
+    scope: CoroutineScope,
+    paymentViewModel: PaymentViewModel
 ) {
     val navController1 = rememberNavController()
     val currentDestination = navController1.currentBackStackEntryAsState().value?.destination?.route
     val userDetail = userDetails.collectAsState(initial = null)
     val getAllCourseResult = profileViewmodel.getAllCourseResult.collectAsState()
+    val courses = profileViewmodel.enrolledCourses.collectAsState()
 
     // State to track fullscreen mode
     var isFullScreen by remember { mutableStateOf(false) }
@@ -134,11 +142,16 @@ fun HomeScreen(
                     onCourseClicked = { navController1.navigate("courseDetail") },
                     getAllCourseResult = getAllCourseResult,
                     profileViewmodel = profileViewmodel,
-                    navController = navController1
+                    navController = navController1,
+                    getEnrolledCourseResult = courses
                 )
             }
             composable("courses") {
-                CourseScreen(onBackClicked = { navController1.popBackStack() })
+                CourseScreen(
+                    onBackClicked = { navController1.popBackStack() },
+                    viewModel = profileViewmodel,
+                    navController = navController1
+                )
             }
             composable("profile") {
                 ProfileScreen(
@@ -146,7 +159,8 @@ fun HomeScreen(
                     name = userDetail.value?.name ?: "",
                     email = userDetail.value?.emailAddress ?: "",
                     viewModel = profileViewmodel,
-                    scope = scope
+                    scope = scope,
+                    onBackClicked = {navController1.popBackStack()}
                 )
             }
             composable("downloads") {
@@ -158,7 +172,8 @@ fun HomeScreen(
                     email = userDetail.value?.emailAddress ?: "",
                     phoneNumber = userDetail.value?.mobileNumber ?: "",
                     viewModel = profileViewmodel,
-                    scope = scope
+                    scope = scope,
+                    onBackClicked = {navController1.popBackStack()}
                 )
             }
             composable("courseDetail/{courseId}") { backStackEntry ->
@@ -169,14 +184,19 @@ fun HomeScreen(
                     onClick = { navController1.popBackStack() },
                     profileViewmodel = profileViewmodel,
                     email = userDetail.value?.emailAddress ?: "",
-                    phone = userDetail.value?.mobileNumber ?: ""
+                    phone = userDetail.value?.mobileNumber ?: "",
+                    paymentViewModel = paymentViewModel
                 )
             }
-            composable("onPurchasedScreen") {
+            composable("onPurchasedScreen/{courseId}") {
+                    backStackEntry ->
+                val courseId = backStackEntry.arguments?.getString("courseId") ?: return@composable
                 ResponsiveCourseDetailScreenOnPurchase(
                     videoUri = "https://storage.googleapis.com/exoplayer-test-media-0/BigBuckBunny_320x180.mp4",
                     isFullScreen = isFullScreen,
-                    onFullScreenToggle = { newValue -> isFullScreen = newValue }
+                    onFullScreenToggle = { newValue -> isFullScreen = newValue },
+                    homescreenViewmodel = profileViewmodel,
+                    courseId = courseId
                 )
             }
         }
@@ -244,12 +264,16 @@ fun ContentScreen(
     onCourseClicked: () -> Unit = {},
     enrolled: Boolean = true,
     getAllCourseResult: State<NetworkResponse<GetAllCourse>?>,
+    getEnrolledCourseResult: State<NetworkResponse<EnrolledCourse>?>,
     profileViewmodel: HomescreenViewmodel,
     navController: NavController
 ) {
 
     var refreshing by remember { mutableStateOf(false) }
-
+    LaunchedEffect(Unit) {
+        profileViewmodel.getAllCourse()
+        profileViewmodel.getEnrolledCourse()
+    }
     PullToRefreshBox(
         isRefreshing = refreshing,
         onRefresh = {
@@ -268,45 +292,68 @@ fun ContentScreen(
         Spacer(Modifier.height(20.dp))
         ResponsiveSearchBar()
         Spacer(Modifier.height(20.dp))
+        when (val allCoursesResult = getAllCourseResult.value) {
 
-        when (val result = getAllCourseResult.value) {
-            is NetworkResponse.Loading -> OnLoading()
             is NetworkResponse.Success -> {
-                refreshing = false
-                // Check if the list is null or empty to handle gracefully
-                val courseList = result.data.data
-                if (courseList.isNullOrEmpty()) {
-                    OnError("No courses found.")
-                } else {
-                           LazyColumn(
-                               modifier = Modifier,
-                               verticalArrangement = Arrangement.spacedBy(8.dp)
-                           ) {
-                               items(courseList){
-                                   course->
-                                   CourseContent2(
-                                       img2 = course.thumbnail,
-                                       courseName = course.courseName,
-                                       price = course.price.toString(),
-                                       noOfStudnets = course.studentsEnrolled.size,
-                                       onClick = {
-                                           navController.navigate("courseDetail/${course._id}")
-                                       }
-                                   )
-                               }
-                           }
+                Log.e("ContentScreen", "getAllCourseResult: Success")
+                when (val enrolledResult = getEnrolledCourseResult.value) {
+                    is NetworkResponse.Success -> {
+                        val enrolledCourseIds = enrolledResult.data.data
+                        val enrolled: MutableList<String> = mutableListOf()
+                        for (i in enrolledCourseIds)
+                        {
+                            enrolled += (i._id)
+                        }
+                        Log.e("Hellooo","$enrolled")
+                        var allCourse = allCoursesResult.data.data
+                        Log.e("Hellooo","$allCourse")
+
+                        val notEnrolledCourses = allCourse.filter { course ->
+                            course._id !in enrolled
+                        }
+                        Log.e("Hellooo","$notEnrolledCourses")
+
+                        if (notEnrolledCourses.isEmpty()) {
+                            OnError("No courses available for enrollment.")
+                        } else {
+                            LazyColumn(
+                                modifier = Modifier,
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                items(notEnrolledCourses) { course ->
+                                    CourseContent2(
+                                        img2 = course.thumbnail,
+                                        courseName = course.courseName,
+                                        price = course.price.toString(),
+                                        noOfStudnets = course.studentsEnrolled.size,
+                                        onClick = {
+                                            navController.navigate("courseDetail/${course._id}")
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    is NetworkResponse.Error -> {
+                        OnError(enrolledResult.message, onClick = { profileViewmodel.getEnrolledCourse() })
+                    }
+
+                    else -> OnLoading()
                 }
             }
-            is NetworkResponse.Error ->   {
-                refreshing = false
-                OnError(result.message, onClick = {
-                    refreshing = true
-                    profileViewmodel.getAllCourse()
-                })
+
+            is NetworkResponse.Error -> {
+                Log.e("ContentScreen", "getAllCourseResult: Error: ${allCoursesResult}")
+                OnError(allCoursesResult.message, onClick = { profileViewmodel.getAllCourse() })
             }
-            null -> {
-                refreshing = false
-                OnError("No data to display.")
+
+            is NetworkResponse.Loading -> {
+                OnLoading()
+                Log.e("ContentScreen", "getAllCourseResult: Loading")
+            }
+            else -> {
+                Log.e("ContentScreen", "getAllCourseResult: Other")
             }
         }
     }}
@@ -319,6 +366,16 @@ private fun TopContent(
     onBellClicked:()->Unit = {},
     name:String = ""
 ){
+    // Get the current hour of the day
+    val currentHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+
+    // Determine the greeting based on the current hour
+    val greeting = when (currentHour) {
+        in 0..11 -> "Good Morning" // 00:00 - 11:59
+        in 12..15 -> "Good Afternoon" // 12:00 - 15:59
+        else -> "Good Evening" // Default case (shouldn't happen, but good for safety)
+    }
+
    // val userDetails by dataStoreManger.getFromDataStore().collectAsState(initial = null)
     Row(
         modifier = Modifier
@@ -328,6 +385,7 @@ private fun TopContent(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ){
+
             Column(
                 modifier = Modifier,
                 verticalArrangement = Arrangement.Center,
@@ -335,7 +393,7 @@ private fun TopContent(
             ) {
                 Spacer(modifier=Modifier.height(5.dp))
                 Text(
-                    "Good Morning",
+                    text = greeting,
                     style = TextStyle(
                         fontFamily = urbanist,
                         fontWeight = FontWeight.Normal,
@@ -587,7 +645,7 @@ fun CourseContent2(
 
         val rupeeSymbol = Currency.getInstance(java.util.Locale("en", "IN")).symbol
         ButtonComm(
-            text = "Buy at $rupeeSymbol$price",
+            text = if(price!="Watch")"Buy at $rupeeSymbol$price" else "Watch",
             onClick = onClick
         )
     }

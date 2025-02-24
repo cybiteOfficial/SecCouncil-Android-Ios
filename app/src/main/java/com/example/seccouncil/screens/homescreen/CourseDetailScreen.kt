@@ -1,8 +1,9 @@
 package com.example.seccouncil.screens.homescreen
 
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -23,13 +24,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
@@ -46,9 +47,9 @@ import com.example.seccouncil.common.EnrolledContent
 import com.example.seccouncil.common.RatingContent
 import com.example.seccouncil.common.TopAppBar
 import com.example.seccouncil.network.getAllCourseDetailsModel.NetworkResponse
-import com.example.seccouncil.payment_done
-import com.example.seccouncil.payment_gateway.PaymentDetails
-import com.example.seccouncil.utlis.DataStoreManger
+import com.example.seccouncil.payment_gateway.PaymentViewModel
+import com.example.seccouncil.payment_gateway.data.module.PaymentState
+import kotlinx.coroutines.launch
 
 
 @Composable
@@ -56,20 +57,12 @@ fun ResponsiveCourseDetailScreen(
     navController:NavController,
     courseId: String="",
     onClick: () -> Unit = {},
-    paymentDetails: PaymentDetails = PaymentDetails("", "", 0),
-//    onBuy: () -> Unit = {},
     profileViewmodel: HomescreenViewmodel,
     email:String = "",
-    phone:String = ""
+    phone:String = "",
+    paymentViewModel: PaymentViewModel
 ) {
-    val context = LocalContext.current
-    val dataStoreHelper = remember { DataStoreManger(context) }
-
-    var isPurchased by remember { mutableStateOf(false) }
-
-//    LaunchedEffect(courseId) {
-//        isPurchased = dataStoreHelper.isCoursePurchased(courseId)
-//    }
+    val paymentState by paymentViewModel.paymentState.collectAsState()
 
     // Fetch course details using API
     val courseDetailResult by profileViewmodel.getCourseDetailResult.collectAsState()
@@ -78,7 +71,6 @@ fun ResponsiveCourseDetailScreen(
         profileViewmodel.getCourseDetail(courseId)
     }
 
-    val configuration = LocalConfiguration.current
     val density = LocalDensity.current
 
     var isExpanded1 by remember { mutableStateOf(false) }
@@ -159,6 +151,7 @@ fun ResponsiveCourseDetailScreen(
 
                             Spacer(Modifier.height(16.dp))
                             val context = LocalContext.current
+                            val coroutineScope = rememberCoroutineScope()  // Fix: Define coroutineScope
 
                             // Buy Button
                             ButtonComposable(
@@ -171,21 +164,68 @@ fun ResponsiveCourseDetailScreen(
                                 height = buttonHeight,
                                 fontWeight = FontWeight.SemiBold,
                                 onClick = {
-                                    if(payment_done){
-                                            navController.navigate("onPurchasedScreen")
-                                    }else{
-                                        (context as? MainActivity)?.startRazorpayPayment(
-                                            coursePrice =  courseDetail.courseDetails.price,
-                                            email = email,
-                                            phone = phone,
+                                    // capture payment (courseid)
+                                    // response -> orderid
+//                                    if (paymentState is PaymentState.PaymentIdle) {
+//                                        paymentViewModel.startRazorpayPayment(
+//                                            activity = context as MainActivity,
+//                                            coursePrice = courseDetail.courseDetails.price,
+//                                            email = email,
+//                                            phone = phone,
+//                                            // orderId
+//                                        )
+//                                    }
+                                    if (paymentState is PaymentState.PaymentIdle || paymentState is PaymentState.PaymentError) {
+                                        Log.e("orderIDD","on button click")
+                                        // Step 1: Capture Payment
+                                        coroutineScope.launch {
+                                            val response = paymentViewModel.captureUserPayment(
+                                                context = context,
+                                                courses = listOf(courseDetail.courseDetails._id)
+                                            )
+                                            Log.e("orderIDD","${response?.success}")
 
-                                        )
+                                            if (response?.success == true && response.data != null) {
+                                                val orderId = response.data.id  // Extract Order ID from response
+
+                                                Log.e("orderIDD","$orderId")
+
+                                                // Reset state before proceeding
+                                                paymentViewModel.resetPaymentState()
+                                                paymentViewModel.setCourseId(courseId) // Store the course ID
+                                                // Step 2: Start Razorpay Payment only after getting orderId
+                                                paymentViewModel.startRazorpayPayment(
+                                                    activity = context as MainActivity,
+                                                    coursePrice = courseDetail.courseDetails.price,
+                                                    email = email,
+                                                    phone = phone,
+                                                    orderId = orderId // Passing the correct Order ID
+                                                )
+                                            } else {
+                                                Log.e("Payment", "Failed to capture payment: ${response?.data?.status}")
+                                            }
+                                        }
                                     }
                                 }
                             )
                         }
                     }
                 )
+            }
+            when(val state = paymentState){
+                is PaymentState.PaymentSuccess -> {
+                 //   Toast.makeText(LocalContext.current as MainActivity, "Payment done Successfully", Toast.LENGTH_SHORT).show()
+                    LaunchedEffect(Unit) {
+                        // Replace the current screen with "onPurchasedScreen" and remove it from the back stack
+                        navController.popBackStack()   // Pop the current screen
+                        navController.navigate("onPurchasedScreen/${courseId}")
+                        paymentViewModel.resetPaymentState()
+                    }
+                }
+                is PaymentState.PaymentError -> {
+                   // Toast.makeText(LocalContext.current as MainActivity, "Payment Failed", Toast.LENGTH_LONG).show()
+                }
+                else -> {}
             }
         }
         is NetworkResponse.Error -> {
@@ -194,19 +234,17 @@ fun ResponsiveCourseDetailScreen(
         }
         null -> OnError("No details found.")
     }
-
-
 }
 
 @Preview(showSystemUi = true)
 @Composable
 fun ExpandableCard(
     modifier: Modifier = Modifier,
-    title: String,
-    content: String,
-    isExpanded: Boolean,
-    onExpandToggle: () -> Unit,
-    maxLines: Int,
+    title: String= "",
+    content: String = "",
+    isExpanded: Boolean = false,
+    onExpandToggle: () -> Unit = {},
+    maxLines: Int = 4,
     verticalPadding: Dp = 10.dp,
     horizontalPadding:Dp = 5.dp
 ) {
@@ -237,7 +275,7 @@ fun ExpandableCard(
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier
-                    .align(Alignment.End)
+                    .align(Alignment.Start)
                     .clickable { onExpandToggle() }
                     .padding(vertical = 4.dp)
             )

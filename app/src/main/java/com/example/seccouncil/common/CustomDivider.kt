@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
@@ -24,6 +25,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -47,26 +50,28 @@ fun BottomContent(
     clickabletext:String ="hello",
     onLoginClick:()->Unit = {}
 ) {
+    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+
     Column(
         modifier = Modifier.wrapContentHeight()
+            .padding(horizontal = 15.dp)
     ) {
         Row(
             modifier = modifier
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(
-                15.dp,
-                alignment = Alignment.CenterHorizontally
-            )
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Img_in_Box(
                 img = R.drawable.facebook,
                 modifier = Modifier.weight(1f)
             )
+            Spacer(Modifier.width(screenWidth*0.015f))
             Img_in_Box(
                 img = R.drawable.google,
                 modifier = Modifier.weight(1f)
             )
+            Spacer(Modifier.width(screenWidth*0.015f))
             Img_in_Box(
                 img = R.drawable.apple,
                 modifier = Modifier.weight(1f)
@@ -82,9 +87,14 @@ private fun Img_in_Box(
     modifier: Modifier = Modifier,
     @DrawableRes img :Int = R.drawable.google
 ){
+    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+
     Box(
         modifier = Modifier
-            .size(height = 56.dp, width = 105.dp)
+            .size(
+                height = screenWidth * 0.15f, // Responsive height
+                width = screenWidth * 0.3f   // Responsive width
+            )
             .border(0.5.dp,Color.Gray, RoundedCornerShape(8.dp))
             .clip(RoundedCornerShape(8.dp))
 
@@ -105,6 +115,8 @@ fun BottomText(
     clickabletext:String = "Hello",
     onClick:()->Unit = {}
 ){
+    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+    val fontSizeSp = with(LocalDensity.current) { (screenWidth * 0.045f).toSp() } // Convert Dp to Sp
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -116,7 +128,7 @@ fun BottomText(
             style = TextStyle(
                 fontFamily = urbanist,
                 fontWeight = FontWeight.Medium,
-                fontSize = 16.sp
+                fontSize = fontSizeSp // Responsive text size
             )
         )
         GradientClickableText(clickabletext = clickabletext, onLoginClick = onClick)
@@ -129,6 +141,8 @@ fun GradientClickableText(
     clickabletext: String,
     onLoginClick: () -> Unit = {}
 ) {
+    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+    val fontSizeSp = with(LocalDensity.current) { (screenWidth * 0.045f).toSp() } // Convert Dp to Sp
 
     BasicText(
         text = buildAnnotatedString {
@@ -140,7 +154,7 @@ fun GradientClickableText(
                             Color(0xFF5271FF)  // End color
                         )
                     ),
-                    fontSize = 16.sp,
+                    fontSize = fontSizeSp,
                     fontWeight = FontWeight.Bold,
                     fontFamily = urbanist
                 )
@@ -149,7 +163,7 @@ fun GradientClickableText(
             }
         },
         modifier = Modifier
-            .padding(start = 5.dp)
+            .padding(start = screenWidth * 0.015f)
             .clickable(onClick = onLoginClick)
     )
 }

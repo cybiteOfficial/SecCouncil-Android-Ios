@@ -42,16 +42,17 @@ import com.example.seccouncil.common.Dividerr
 import com.example.seccouncil.ui.theme.UrbanistTitleStyle
 import com.example.seccouncil.ui.theme.urbanist
 import com.example.seccouncil.viewmodel.LoginViewModel
+import com.example.seccouncil.viewmodel.LoginViewModelFactory
 
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun Login(
     onLoginClicked:()->Unit ={},
-    loginViewModel: LoginViewModel = viewModel(),
     onRegisterClick: () -> Unit = {}
 ){
     val context = LocalContext.current
+    val loginViewModel: LoginViewModel = viewModel(factory = LoginViewModelFactory(context))
     val loginEmail by loginViewModel.loginEmail
     val loginPassword by loginViewModel.loginPassword
     val errorMessage by loginViewModel.errorMessage

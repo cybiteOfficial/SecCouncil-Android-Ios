@@ -27,7 +27,6 @@ fun Dividerr(
     ) {
         HorizontalDivider(modifier = Modifier
             .weight(1f)
-            .padding(start = 11.dp)
             .fillMaxWidth()
             , color = Color.LightGray
         ) // Line on the left

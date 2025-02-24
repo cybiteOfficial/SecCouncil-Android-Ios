@@ -2,6 +2,7 @@ package com.example.seccouncil.utlis
 
 
 import android.content.Context
+import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
@@ -9,9 +10,12 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.example.seccouncil.model.UserDetails
+import com.example.seccouncil.network.ApiService
+import com.example.seccouncil.network.ApiService.api
+import com.example.seccouncil.network.LoginRequest
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 
 
 // Define a constant for the name of our DataStore
@@ -36,6 +40,7 @@ class DataStoreManger(val context: Context) {
         val NAME = stringPreferencesKey("NAME")
         val IMAGE_FILE_NAME = stringPreferencesKey("image_file_name")
         private val PURCHASED_COURSES_KEY = stringSetPreferencesKey("purchased_courses")
+        private val JWT_TOKEN_KEY = stringPreferencesKey("jwt_token")
     }
 
     // Suspend function to save user details to DataStore
@@ -116,5 +121,45 @@ class DataStoreManger(val context: Context) {
             preferences[PURCHASED_COURSES_KEY] ?: emptySet()
         }.first() // Get the first value from the Flow
         return courseId in courses
+    }
+    /**
+     * Save JWT token to DataStore
+     */
+    suspend fun saveJwtToken(token: String) {
+        context.preferenceDataStore.edit { preferences ->
+            preferences[JWT_TOKEN_KEY] = token
+        }
+        Log.e("TOkkk","$token")
+    }
+
+    // Function to log in and store the JWT token in DataStore
+    suspend fun loginAndStoreToken(context: Context, email: String, password: String): Boolean {
+        val api = ApiService.createAuthenticatedApi(context)  // Use the authenticated API instance
+        val response = api.login(LoginRequest(email, password))
+
+        if (response.isSuccessful && response.body()?.success == true) {
+            response.body()?.token?.let { token ->
+                DataStoreManger(context).saveJwtToken(token) // Store JWT token
+            }
+            return true
+        }
+        return false
+    }
+    /**
+     * Retrieve JWT token as a Flow
+     */
+    fun getStoredToken(): Flow<String?> {
+        return context.preferenceDataStore.data.map { preferences ->
+            preferences[JWT_TOKEN_KEY]
+        }
+    }
+
+    /**
+     * Logout user and clear JWT token
+     */
+    suspend fun clearJwtToken() {
+        context.preferenceDataStore.edit { preferences ->
+            preferences.remove(JWT_TOKEN_KEY)
+        }
     }
 }

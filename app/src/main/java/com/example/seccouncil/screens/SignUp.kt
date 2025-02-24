@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -53,6 +54,9 @@ fun SignUp(
     authViewModel: SignUpViewModel = viewModel(),
     onLoginClicked:()->Unit = {}
 ) {
+    val configuration = LocalConfiguration.current // Get screen size
+    val screenHeight = configuration.screenHeightDp.dp
+
     val email by authViewModel.email
     val password by authViewModel.password
     val confirmPassword by authViewModel.confirmPassword
@@ -76,7 +80,6 @@ fun SignUp(
         Column(
             modifier = Modifier
                 .padding(innerPadding)
-                .navigationBarsPadding()
                 .verticalScroll(state = rememberScrollState())
             ,
             horizontalAlignment = Alignment.CenterHorizontally
@@ -109,13 +112,13 @@ fun SignUp(
                     color = Color.Red
                 )
             }
-            Spacer(Modifier.weight(1f))
+            Spacer(Modifier.height(screenHeight * 0.015f))
             BottomText(
                 normaltext = "Already have an account?",
                 clickabletext = "Login Now",
                 onClick = onLoginClicked
             )
-            Spacer(Modifier.height(28.dp))
+            Spacer(Modifier.height(if (screenHeight < 600.dp) 16.dp else 28.dp)) // ✅ Adaptive spacing
         }
         if (authViewModel.isLoading.value) {
             Column(
@@ -148,6 +151,11 @@ fun SignUpContent(
     country: Country,
     onCountryCodeChange:(Country)->Unit
 ) {
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp.dp
+    val screenHeight = configuration.screenHeightDp.dp
+
+
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -155,14 +163,14 @@ fun SignUpContent(
             Text(
                 text = "Hello! Register to get\nstarted",
                 style = TextStyle(
-                    fontSize = 32.sp,
+                    fontSize = if (screenWidth < 360.dp) 24.sp else 32.sp, // ✅ Adaptive font size,
                     fontFamily = FontFamily.SansSerif,
                     fontWeight = FontWeight.Bold
                 ),
                 modifier = Modifier
-                    .padding(start = 15.dp, top = 80.dp)
+                    .padding(start = 15.dp, top = screenHeight * 0.08f)
             )
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(screenHeight * 0.04f)) // ✅ Dynamic spacing
             Row(
                 modifier = Modifier.fillMaxWidth()
                     .padding(start = 25.dp, end = 15.dp),
@@ -188,41 +196,41 @@ fun SignUpContent(
                 )
             }
 
-            Spacer(Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(screenHeight * 0.015f))
             InputField(
                 placeHolderText = "Email",
                 imeAction = ImeAction.Next,
                 value = email,
                 onValueChange = onEmailChange
             )
-            Spacer(Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(screenHeight * 0.015f))
             CountryPicker(
                         phoneNumber = phoneNumber,
                 country = country,
                 onPhoneNumberChange = onPhoneNumberChange,
                 onCountryCodeChange = onCountryCodeChange
             )
-            Spacer(Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(screenHeight * 0.015f))
             InputField(
                 placeHolderText = "Password",
                 imeAction = ImeAction.Next,
                 value = password,
                 onValueChange = onPasswordChange
             )
-            Spacer(Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(screenHeight * 0.015f))
             InputField(
                 placeHolderText = "Confirm password",
                 imeAction = ImeAction.Done,
                 value = confirmPassword,
                 onValueChange = onConfirmPasswordChange
             )
-            Spacer(Modifier.height(30.dp))
+            Spacer(modifier = Modifier.height(screenHeight * 0.05f))
             Button(
                 onClick = onRegisterClick,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 15.dp, end = 15.dp)
-                    .height(50.dp),
+                    .fillMaxWidth(0.9f)
+                    .align(Alignment.CenterHorizontally)
+                    .height(if (screenHeight < 600.dp) 45.dp else 50.dp), // ✅ Adjust height for compact screens,
                 shape = RoundedCornerShape(10.dp),
                 colors = ButtonColors(
                     containerColor = Color.Black,
@@ -236,12 +244,12 @@ fun SignUpContent(
                     text = "Register",
                     fontFamily = FontFamily.SansSerif,
                     fontWeight = FontWeight.Medium,
-                    fontSize = 16.sp
+                    fontSize = if (screenWidth < 360.dp) 14.sp else 16.sp, // ✅ Adaptive button text size
                 )
             }
-            Spacer(Modifier.height(35.dp))
+            Spacer(modifier = Modifier.height(screenHeight * 0.03f))
             Dividerr()
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(screenHeight * 0.015f))
         }
 }
 
@@ -258,6 +266,8 @@ fun InputField(
     startPadding: Dp = 25.dp,
     endPadding: Dp = 15.dp
 ){
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp.dp
     TextField(
         value = value,
         onValueChange = onValueChange,
@@ -281,7 +291,7 @@ fun InputField(
             fontFamily = FontFamily.SansSerif,
             fontWeight = FontWeight.Normal,
             color = colorResource(R.color.place_holder),
-            fontSize = 12.sp
+            fontSize = if (screenWidth < 360.dp) 12.sp else 14.sp, // ✅ Adaptive text size
         ) },
         maxLines = 1
     )

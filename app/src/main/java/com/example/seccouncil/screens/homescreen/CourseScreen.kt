@@ -17,6 +17,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -26,20 +29,32 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.seccouncil.common.ButtonComm
 import com.example.seccouncil.common.EnrolledContent
 import com.example.seccouncil.common.RatingContent
 import com.example.seccouncil.common.TextComm
 import com.example.seccouncil.network.getAllCourseDetailsModel.Data
+import com.example.seccouncil.network.getAllCourseDetailsModel.NetworkResponse
+import com.example.seccouncil.network.getEnrolledCourse.EnrolledCourse
 
 @Preview(showSystemUi = true)
 @Composable
 fun CourseScreen(
     modifier: Modifier = Modifier,
     onEnrollClicked:()->Unit = {},
-    onBackClicked:()->Unit = {}
+    onBackClicked:()->Unit = {},
+    viewModel: HomescreenViewmodel,
+    navController:NavController
 ){
+    val courses by viewModel.enrolledCourses.collectAsState()
+
+//    LaunchedEffect(Unit) {
+//        viewModel.getEnrolledCourse()
+//    }
+
+    val totalEnrolledCourse = courses
     Column(
         modifier = Modifier
             .safeDrawingPadding()
@@ -52,12 +67,52 @@ fun CourseScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
                 OnGoingCourses()
-                Text(
-                    text = "No Course Enrolled",
-                    fontSize = 20.sp,
-                    modifier = Modifier
-                        .align(Alignment.CenterHorizontally)
-                )
+
+            when (courses) {
+                is NetworkResponse.Loading -> {
+                    CircularProgressIndicator()
+                }
+
+                is NetworkResponse.Success -> {
+                    val enrolledCourses = (courses as NetworkResponse.Success<EnrolledCourse>).data.data
+                    if (enrolledCourses.isEmpty()) {
+                        Text(
+                            text = "No Course Enrolled",
+                            fontSize = 20.sp,
+                            modifier = Modifier.align(Alignment.CenterHorizontally)
+                        )
+                    } else {
+                        LazyColumn {
+                            items(enrolledCourses) { course ->
+                                CourseContent2(
+                                    img2 = course.thumbnail,
+                                    courseName = course.courseName,
+                                    price = "Watch",
+                                    noOfStudnets = course.studentsEnrolled.size,
+                                    onClick = {
+                                        navController.navigate("onPurchasedScreen/${course._id}")
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+
+                is NetworkResponse.Error -> {
+                    Text(
+                        text = (courses as NetworkResponse.Error).message,
+                        color = Color.Red
+                    )
+                }
+
+                null -> {
+                    Text(
+                        text = "Loading courses...",
+                        fontSize = 20.sp,
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
+                }
+            }
         }
 
     }

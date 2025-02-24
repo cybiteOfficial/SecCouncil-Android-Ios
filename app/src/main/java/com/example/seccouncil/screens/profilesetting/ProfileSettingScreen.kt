@@ -1,6 +1,7 @@
 package com.example.seccouncil.screens.profilesetting
 
 import android.net.Uri
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -23,6 +24,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -66,8 +68,19 @@ fun ProfileSettingScreen(
         )
 
     val context = LocalContext.current
+    val uploadStatus by viewModel.uploadStatus.collectAsState()
 
+    val isUploading by viewModel.isUploading.collectAsState()
+
+// Show Toast when uploadStatus changes
+    LaunchedEffect(uploadStatus) {
+        uploadStatus?.let {
+            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+            viewModel.clearUploadStatus() // Clear status after showing the toast
+        }
+    }
     // Collect the current file name from the ViewModel’s StateFlow
+    val tempImageUri by viewModel.tempImageUri.collectAsState()
     val imageFileName by viewModel.imageFileName.collectAsState()
 
     // This checks whether the image file name is still being fetched.
@@ -79,13 +92,14 @@ fun ProfileSettingScreen(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         uri?.let {
-            viewModel.saveImageToInternalStorage(it)
+            viewModel.setTempImageUri(it) // Cache the picked image URI
         }
     }
 
 
 
     TopAppBar(
+        showTrailingIcon = false,
         title = "Profile",
         onClick = onBackClicked,
         content = {
@@ -100,48 +114,71 @@ fun ProfileSettingScreen(
                     modifier = Modifier
                         .size(225.dp)
                         .border(0.5.dp, color = Color.White, RoundedCornerShape(10.dp))
-                        .clip(RoundedCornerShape(10.dp))
+                        .clip(RoundedCornerShape(10.dp)),
+                    contentAlignment = Alignment.Center // This centers the loader
                 ) {
-                    if (isLoading) {
-                        // Show spinner if still loading from DataStore
-                        CircularProgressIndicator(Modifier.align(Alignment.Center))
-                    } else if (!imageFileName.isNullOrEmpty()) {
-                        // Display the image saved to internal storage
-                        Image(
-                            painter = rememberAsyncImagePainter(
-                                File(context.filesDir, imageFileName!!)
-                            ),
-                            contentDescription = null,
+                    if (isUploading) {
+                        CircularProgressIndicator(
                             modifier = Modifier
-                                .size(225.dp)
-                                .clip(CircleShape),
-                            contentScale = ContentScale.Crop
-                        )
-                    } else {
-                        // Show a default image if no filename stored
-                        Image(
-                            painter = painterResource(R.drawable.profilepic),
-                            contentDescription = "Default",
-                            modifier = Modifier
-                                .size(225.dp)
-                                .clip(CircleShape),
-                            contentScale = ContentScale.Crop
+                                .size(48.dp)
+                                .align(Alignment.Center)
                         )
                     }
-                    Icon(
-                        painter = painterResource(R.drawable.gallary2), // Replace with your gallery icon
-                        contentDescription = "Change Profile Picture",
-                        tint = Color.Black, // Adjust icon color as needed
-                        modifier = Modifier
-                            .size(56.dp) // Adjust icon size as needed
-                            .align(Alignment.BottomEnd) // Align to bottom-right
-                            .padding(8.dp) // Add padding for spacing
-                            .background(Color.White, CircleShape) // Add background to the icon
-                            .padding(8.dp)
-                            .clickable {
-                                getContentLauncher.launch("image/*")
+                        when {
+                            tempImageUri != null -> {
+                                // Show the selected image (not yet uploaded)
+                                Image(
+                                    painter = rememberAsyncImagePainter(tempImageUri),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(225.dp).clip(CircleShape),
+                                    contentScale = ContentScale.Crop
+                                )
                             }
-                    )
+                            !imageFileName.isNullOrEmpty() -> {
+                                // Show saved image from internal storage
+                                if (isLoading) {
+                                    CircularProgressIndicator(Modifier.align(Alignment.Center))
+                                } else {
+                                    Image(
+                                        painter = rememberAsyncImagePainter(File(context.filesDir, imageFileName!!)),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(225.dp).clip(CircleShape),
+                                        contentScale = ContentScale.Crop
+                                    )
+                                }
+                            }
+                            else -> {
+                                // Show default profile picture
+                                Image(
+                                    painter = painterResource(R.drawable.profilepic),
+                                    contentDescription = "Default",
+                                    modifier = Modifier.size(225.dp).clip(CircleShape),
+                                    contentScale = ContentScale.Crop
+                                )
+                            }
+                        }
+                    // Show loading indicator on top of the image
+                    if (isUploading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .align(Alignment.Center)
+                        )
+                    }
+                        Icon(
+                            painter = painterResource(R.drawable.add_photo_alternate), // Replace with your gallery icon
+                            contentDescription = "Change Profile Picture",
+                            tint = Color.Black, // Adjust icon color as needed
+                            modifier = Modifier
+                                .size(56.dp) // Adjust icon size as needed
+                                .align(Alignment.BottomEnd) // Align to bottom-right
+                                .padding(8.dp) // Add padding for spacing
+                                .background(Color.White, CircleShape) // Add background to the icon
+                                .padding(8.dp)
+                                .clickable {
+                                    getContentLauncher.launch("image/*")
+                                }
+                        )
                 }
                 Spacer(Modifier.height(5.dp))
                 profilescreensettingitemtitle.forEachIndexed { index, item ->
@@ -174,12 +211,14 @@ fun ProfileSettingScreen(
                         textMotion = TextMotion.Animated
                     ),
                     modifier = Modifier
-                        .clickable {
+                        .clickable(enabled = !isUploading) { // Disable button while uploadinggit commit --amend -m "New commit message"
+                            tempImageUri?.let { uri ->
+                                viewModel.saveImageToInternalStorage(uri)
+                            }
                         }
                 )
             }
         }
     )
-
 }
 
