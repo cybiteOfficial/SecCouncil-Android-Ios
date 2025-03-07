@@ -149,11 +149,15 @@ interface ApiInterface {
     ):Response<EnrolledCourse>
 
 
+    // Define a POST request to the endpoint "/api/v1/payment/verifyPayment"
     @POST("/api/v1/payment/verifyPayment")
+    // This function is a suspend function, which means it can be paused and resumed at a later time
     suspend fun verifyPayment(
+        // The Authorization header is passed to the request for authentication
         @Header("Authorization") authHeader: String,
-        @Body request : verifyPaymentRequest
-    ):Response<verifyPaymentResponse>
+        // The body of the request, which contains the payment verification details
+        @Body request: verifyPaymentRequest
+    ): Response<verifyPaymentResponse> // The function returns a Response object containing verifyPaymentResponse
 
     @POST("/api/v1/course/getFullCourseDetails")
     suspend fun getFullCourseDetail(
@@ -162,3 +166,11 @@ interface ApiInterface {
     ):Response<getFullCourseDetailResponse>
 
 }
+
+/*
+* @POST("/endpoint")
+* suspend fun verifyPayment(
+* @Header("Authorization")authHeader:String,
+* @Body request:Request
+* ):Resoponse<PaymentResponse>
+* */

@@ -94,12 +94,13 @@ dependencies {
     implementation ("com.razorpay:checkout:1.6.41")
 
     //exo player
-    implementation ("com.google.android.exoplayer:exoplayer:2.19.1")
+    implementation("androidx.media3:media3-exoplayer:1.5.1")
+    implementation("androidx.media3:media3-exoplayer-dash:1.5.1")
+    implementation("androidx.media3:media3-ui:1.5.1")
 
     // OkHttp for HTTP operations
     implementation ("com.squareup.okhttp3:okhttp:4.12.0")
 
     // JWT decoding library
     implementation ("com.auth0:java-jwt:3.10.3")
-
 }

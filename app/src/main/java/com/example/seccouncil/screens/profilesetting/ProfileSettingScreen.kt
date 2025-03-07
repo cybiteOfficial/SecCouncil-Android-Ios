@@ -184,23 +184,23 @@ fun ProfileSettingScreen(
                 profilescreensettingitemtitle.forEachIndexed { index, item ->
                     ProfileScreenSettingItem(Modifier, item.image, item.title, item.description)
                 }
-                Button(
-                    onClick = {},
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Black),
-                    modifier = Modifier
-                        .align(Alignment.End)
-                        .size(width = 160.dp, height = 40.dp),
-                    shape = RoundedCornerShape(10.dp)
-                ) {
-                    Text(
-                        text = "Verify OTP",
-                        style = TextStyle(
-                            fontFamily = urbanist,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    )
-                }
+//                Button(
+//                    onClick = {},
+//                    colors = ButtonDefaults.buttonColors(containerColor = Color.Black),
+//                    modifier = Modifier
+//                        .align(Alignment.End)
+//                        .size(width = 160.dp, height = 40.dp),
+//                    shape = RoundedCornerShape(10.dp)
+//                ) {
+//                    Text(
+//                        text = "Verify OTP",
+//                        style = TextStyle(
+//                            fontFamily = urbanist,
+//                            fontSize = 16.sp,
+//                            fontWeight = FontWeight.SemiBold
+//                        )
+//                    )
+//                }
                 Spacer(Modifier.weight(1f))
                 Text(
                     text = "Save Changes",

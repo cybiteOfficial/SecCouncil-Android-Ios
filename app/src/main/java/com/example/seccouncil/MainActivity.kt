@@ -1,6 +1,5 @@
 package com.example.seccouncil
 
-import android.app.Activity
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -25,7 +24,6 @@ import com.razorpay.Checkout
 import com.razorpay.PaymentData
 import com.razorpay.PaymentResultWithDataListener
 import kotlinx.coroutines.launch
-import org.json.JSONObject
 
 class MainActivity : ComponentActivity(),PaymentResultWithDataListener {
     private var paymentDetails by mutableStateOf(PaymentDetails(null, null, 250000))
@@ -60,16 +58,6 @@ class MainActivity : ComponentActivity(),PaymentResultWithDataListener {
         * */
     }
     override fun onPaymentSuccess(paymentId: String?, paymentData: PaymentData?) {
-//        payment_done = false
-//        paymentDetails = paymentDetails.copy(paymentId = paymentId, orderId = paymentData?.orderId)
-//        Toast.makeText(this, "Payment Successful: $paymentId", Toast.LENGTH_LONG).show()
-//        // Handle payment success logic here
-//        Log.e("Payment_status","$paymentId, ${paymentData?.orderId}")
-//        Log.e("Payment_status","$paymentId, ${paymentData?.signature}")
-//        if (paymentId != null) {
-//            paymentViewModel.handlePaymentSuccess(paymentId)
-//        }
-
         Log.e("Payment_status","$paymentId, ${paymentData?.orderId}")
 
 

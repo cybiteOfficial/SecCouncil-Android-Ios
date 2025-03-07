@@ -2,10 +2,14 @@ package com.example.seccouncil.videoplayer
 
 import android.app.Activity
 import android.content.pm.ActivityInfo
-import android.os.Handler
-import android.os.Looper
+import android.os.Build
 import android.util.Log
 import android.view.View
+import android.view.WindowInsets
+import android.view.WindowInsetsController
+import android.view.WindowManager
+import androidx.annotation.OptIn
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -52,6 +56,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.ui.AspectRatioFrameLayout
+import androidx.media3.ui.PlayerView
 import com.example.seccouncil.R
 import com.example.seccouncil.common.EnrolledContent
 import com.example.seccouncil.common.RatingContent
@@ -61,10 +68,10 @@ import com.example.seccouncil.screens.homescreen.ExpandableCard
 import com.example.seccouncil.screens.homescreen.HomescreenViewmodel
 import com.example.seccouncil.screens.homescreen.OnError
 import com.example.seccouncil.screens.homescreen.OnLoading
-import com.google.android.exoplayer2.ui.PlayerView
-import kotlinx.coroutines.delay
 
 
+@OptIn(UnstableApi::class)
+@RequiresApi(Build.VERSION_CODES.P)
 @Preview(showSystemUi = true)
 @Composable
 fun ResponsiveCourseDetailScreenOnPurchase(
@@ -84,32 +91,70 @@ fun ResponsiveCourseDetailScreenOnPurchase(
 
     // Fetch course details using API
     val courseDetailResult by homescreenViewmodel.getFullCourseDetailResult.collectAsState()
-    var currentVideoUrl by remember { mutableStateOf("https://res.cloudinary.com/dg9mvg2el/video/upload/v1734429828/SecCouncil/ikufkzuepw8l28cxv0li.mp4") }
+    var currentVideoUrl by remember { mutableStateOf("https://res.cloudinary.com/dg9mvg2el/video/upload/v1739787392/SecCouncil/x7xqonftu8h9lmeomdlu.mp4") }
 
 
+// This effect will run when the composable is first launched (only once).
     LaunchedEffect(Unit) {
+        // Fetch full course details from the ViewModel using the courseId.
         homescreenViewmodel.getFullCourseDetail(courseId)
+        // Log the video items for debugging purposes.
         Log.e("VideoItems", "$videoItems2")
     }
 
 
 
+// Get the current context (needed to interact with Android APIs like activities)
     val context = LocalContext.current
+// Cast the context to an Activity to manipulate the activity's window
     val activity = context as Activity
 
-    // Initialize ExoPlayer when videoUri changes
+// Initialize ExoPlayer (or another video player) when the video URL changes
     LaunchedEffect(currentVideoUrl) {
-//        Log.e("curr","$currentVideoUrl")
-//        if (currentVideoUrl.isNotEmpty()) {
-//            viewModel.releasePlayer()
-//            Handler(Looper.getMainLooper()).postDelayed({
-//                viewModel.initializePlayer(context, currentVideoUrl)
-//            }, 300)
-//           // viewModel.initializePlayer(context, currentVideoUrl)
-//        }
+        // Log the current video URL for debugging purposes.
         Log.e("curr", "$currentVideoUrl")
+        // Check if the video URL is not empty, and if so, initialize the player with that URL.
         if (currentVideoUrl.isNotEmpty()) {
+            // Call the ViewModel's function to initialize the video player with the new URL
             viewModel.initializePlayer(context, currentVideoUrl)
+        }
+    }
+
+// Handle full-screen mode and system bars (like the status bar and navigation bar) visibility
+    LaunchedEffect(isFullScreen) {
+        // Get the window of the current activity
+        val window = activity.window
+
+        // If the Android version is 11 (API level 30) or higher, use newer system APIs for hiding/showing bars.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            val windowInsetsController = window.insetsController
+            if (isFullScreen) {
+                // If full-screen is enabled, hide the system bars (status bar, navigation bar)
+                windowInsetsController?.hide(WindowInsets.Type.systemBars())
+                windowInsetsController?.systemBarsBehavior =
+                    WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+
+                // Extend content into the device's notch or cutout area (if available)
+                activity.window.attributes.layoutInDisplayCutoutMode =
+                    WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+            } else {
+                // If full-screen is not enabled, show the system bars again.
+                windowInsetsController?.show(WindowInsets.Type.systemBars())
+            }
+        } else {
+            // For devices with Android version below 11 (API level 30)
+            val decorView = activity.window.decorView
+            if (isFullScreen) {
+                // Hide system bars using an older method (for older Android versions).
+                decorView.systemUiVisibility = (
+                        View.SYSTEM_UI_FLAG_FULLSCREEN
+                                or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                                or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                        )
+            } else {
+                // Show system bars again (older method).
+                decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
+            }
         }
     }
 
@@ -130,38 +175,58 @@ fun ResponsiveCourseDetailScreenOnPurchase(
         is NetworkResponse.Success ->{
             Column(
                 modifier = Modifier
-                    .statusBarsPadding()
-                    .fillMaxSize()
-                    .padding(horizontal = 15.dp),
+                    .then(
+                        if (isFullScreen) {
+                            Modifier.fillMaxSize() // Fullscreen: fill entire screen, no padding
+                        } else {
+                            Modifier
+                                .statusBarsPadding()
+                                .fillMaxSize()
+                                .padding(horizontal = 15.dp) // Normal mode with padding
+                        }
+                    ),
                 horizontalAlignment = Alignment.Start
             ) {
                 val videoModifier = if (isFullScreen) {
                     Modifier
-                        .fillMaxSize() // Fullscreen mode
-                        .aspectRatio(16f / 9f) // Forces 16:9 aspect ratio to match most videos
+                        .fillMaxSize() // Fill the entire screen
+                        .background(Color.Black) // Avoid transparent areas
                 } else {
                     Modifier
                         .fillMaxWidth()
                         .aspectRatio(16f / 9f)
-                }
-                Box(
-                    modifier = videoModifier
                         .border(width = 0.5.dp, color = Color.White, shape = RoundedCornerShape(12.dp))
                         .clip(RoundedCornerShape(12.dp))
                         .background(Color.Black)
-                        .zIndex(1f)
+                }
+                Box(
+                    modifier = videoModifier.zIndex(1f)
                 ) {
                     // Check if exoPlayer is not null before displaying PlayerView
                     if (exoPlayer != null) {
+                        // AndroidView is used to display a view from the Android View system (like a PlayerView in this case) inside a Jetpack Compose UI.
                         AndroidView(
+                            // Apply any modifiers to the view to adjust its layout (like padding, size, etc.).
                             modifier = videoModifier,
+
+                            // Factory is used to create the PlayerView when it’s first created (only once).
                             factory = {
+                                // Create a new PlayerView (from ExoPlayer) and set up its properties.
                                 PlayerView(context).apply {
+                                    // Set the ExoPlayer instance to the PlayerView, so the video can be played.
                                     player = exoPlayer
+                                    // Enable the video controller (like play, pause buttons) to be shown.
                                     useController = true
+                                    // Set how the video should scale to fit the view. RESIZE_MODE_FILL will stretch the video to fill the available space.
+                                    resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL
                                 }
                             },
-                            update = { it.player = exoPlayer }
+
+                            // Update block is called when the PlayerView is recomposed. We are updating the player to make sure it has the current ExoPlayer instance.
+                            update = {
+                                // Ensure the player is updated with the latest ExoPlayer instance (in case it has changed).
+                                it.player = exoPlayer
+                            }
                         )
                     } else {
                         // Optionally, show a loading spinner or placeholder while player is initializing
@@ -181,18 +246,19 @@ fun ResponsiveCourseDetailScreenOnPurchase(
                             color = Color.White
                         )
                     }
-                    val IconModifier = if (isFullScreen) {
-                        Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(top = 30.dp, end = 15.dp)
-                    } else {
-                        Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(16.dp)
-                    }
+                    val IconModifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(if (isFullScreen) 30.dp else 16.dp)
                     // Fullscreen Toggle Button
                     IconButton(
                         onClick = {
+                            if (isFullScreen) {
+                                // Exit fullscreen mode (Portrait)
+                                activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+                            } else {
+                                // Enter fullscreen mode (Landscape)
+                                activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+                            }
                             onFullScreenToggle(!isFullScreen)
                         },
                         modifier = IconModifier
@@ -209,14 +275,14 @@ fun ResponsiveCourseDetailScreenOnPurchase(
                     }
 
 // Use LaunchedEffect to toggle orientation
-                    LaunchedEffect(isFullScreen) {
-                        val activity = context as Activity
-                        if (isFullScreen) {
-                            activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-                        } else {
-                            activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-                        }
-                    }
+//                    LaunchedEffect(isFullScreen) {
+//                        val activity = context as Activity
+//                        if (isFullScreen) {
+//                            activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+//                        } else {
+//                            activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+//                        }
+      //              }
 
                 }
                 Spacer(Modifier.height(8.dp))
@@ -329,15 +395,6 @@ fun ResponsiveCourseDetailContent(
                 lineHeight = with(LocalDensity.current) { textSize.toSp() },
                 color = Color.Gray
             )
-            Spacer(Modifier.width(4.dp))
-            IconButton(
-                onClick = {}
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.download),
-                    contentDescription = "Download"
-                )
-            }
         }
     }
 }

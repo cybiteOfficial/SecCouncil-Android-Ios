@@ -62,8 +62,11 @@ class HomescreenViewmodel(
 
     init {
         // On ViewModel init, load the existing file name from DataStore
+// On ViewModel init, launch a coroutine in the viewModelScope
         viewModelScope.launch {
+            // Retrieve the existing file name from DataStore and collect the value
             dataStoreManager.getImageFileName().collect { savedFileName ->
+                // Update the StateFlow _imageFileName with the retrieved value
                 _imageFileName.value = savedFileName
             }
         }
@@ -116,49 +119,6 @@ class HomescreenViewmodel(
 
     private val _uploadStatus = MutableStateFlow<String?>(null)
     val uploadStatus: StateFlow<String?> = _uploadStatus
-
-//    suspend fun uploadProfilePicture(context: Context, imageUri: Uri) {
-//        val api = ApiService.createAuthenticatedApi(context)
-//
-//        val token = runBlocking {
-//            DataStoreManger(context).getStoredToken().firstOrNull()
-//        }
-//
-//        if (token.isNullOrEmpty()) {
-//            Log.e("Profile Update", "Token is missing!")
-//            return
-//        }
-//
-//        // Convert URI to File
-//        val contentResolver = context.contentResolver
-//        val file = File(context.cacheDir, "profile_image.jpg")
-//
-//        contentResolver.openInputStream(imageUri)?.use { inputStream ->
-//            file.outputStream().use { outputStream ->
-//                inputStream.copyTo(outputStream)
-//            }
-//        }
-//
-//        val requestBody = file.asRequestBody("image/jpeg".toMediaTypeOrNull())
-//        val imagePart = MultipartBody.Part.createFormData("displayPicture", file.name, requestBody)
-//
-//        try {
-//            _isUploading.value = true // Start loading
-//            val response = api.updateDisplayPicture("Bearer $token", imagePart)
-//            if (response.isSuccessful && response.body()?.success == true) {
-//                Log.d("Profile Update", "Image updated successfully: ${response.body()?.data?.image}")
-//                _uploadStatus.value = "Image updated successfully!"
-//
-//            } else {
-//                val errorMsg = response.errorBody()?.string() ?: "Unknown error"
-//                Log.e("Profile Update", "Failed to update image: ${response.errorBody()?.string()}")
-//                _uploadStatus.value = "Failed to update: $errorMsg"
-//            }
-//        } catch (e: Exception) {
-//            Log.e("Profile Update", "Error updating profile picture", e)
-//            _uploadStatus.value = "Error updating image: ${e.localizedMessage}"
-//        }
-//    }
 
     suspend fun uploadProfilePicture(context: Context, imageUri: Uri) {
         val api = ApiService.createAuthenticatedApi(context)
