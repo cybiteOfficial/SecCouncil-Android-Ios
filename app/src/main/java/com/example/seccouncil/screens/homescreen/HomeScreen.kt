@@ -2,7 +2,9 @@ package com.example.seccouncil.screens.homescreen
 
 import android.icu.util.Calendar
 import android.icu.util.Currency
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -60,7 +62,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -79,7 +80,6 @@ import com.example.seccouncil.network.getAllCourseDetailsModel.GetAllCourse
 import com.example.seccouncil.network.getAllCourseDetailsModel.NetworkResponse
 import com.example.seccouncil.network.getEnrolledCourse.EnrolledCourse
 import com.example.seccouncil.payment_gateway.PaymentViewModel
-import com.example.seccouncil.screens.DownloadScreen
 import com.example.seccouncil.screens.profilesetting.ProfileScreen
 import com.example.seccouncil.screens.profilesetting.ProfileSettingScreen
 import com.example.seccouncil.ui.theme.urbanist
@@ -88,11 +88,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 
 
+@RequiresApi(Build.VERSION_CODES.P)
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun HomeScreen(
-    userDetails: Flow<UserDetails>,
+    userDetails: Flow<UserDetails> ,
     profileViewmodel: HomescreenViewmodel,
     scope: CoroutineScope,
     paymentViewModel: PaymentViewModel
@@ -163,8 +164,14 @@ fun HomeScreen(
                     onBackClicked = {navController1.popBackStack()}
                 )
             }
-            composable("downloads") {
-                DownloadScreen()
+            composable("Assignment") {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ){
+                    Text(text = "Assignment")
+                }
             }
             composable("profileSetting") {
                 ProfileSettingScreen(
@@ -210,7 +217,7 @@ fun BottomNavigationBar(
     val navItemList = listOf(
         NavItem("Home", icon = R.drawable.outline_home_24), // Replace with your icons
         NavItem("Courses", icon = R.drawable.school),
-        NavItem("Downloads", icon = R.drawable.download),
+        NavItem("Assignment", icon = R.drawable.download),
         NavItem("Profile", icon = R.drawable.outline_person_24)
     )
     val currentRoute = navController.currentBackStackEntry?.destination?.route
