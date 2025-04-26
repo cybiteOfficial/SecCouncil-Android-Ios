@@ -1,5 +1,7 @@
 package com.example.seccouncil.screens.homescreen
 
+import android.app.Activity
+import android.content.Context
 import android.icu.util.Calendar
 import android.icu.util.Currency
 import android.os.Build
@@ -55,6 +57,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -63,6 +66,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -76,6 +80,7 @@ import com.example.seccouncil.common.RatingContent
 import com.example.seccouncil.common.ResponsiveSearchBar
 import com.example.seccouncil.common.TextComm
 import com.example.seccouncil.model.UserDetails
+import com.example.seccouncil.navigation.Routes
 import com.example.seccouncil.network.getAllCourseDetailsModel.GetAllCourse
 import com.example.seccouncil.network.getAllCourseDetailsModel.NetworkResponse
 import com.example.seccouncil.network.getEnrolledCourse.EnrolledCourse
@@ -85,6 +90,7 @@ import com.example.seccouncil.screens.profilesetting.ProfileSettingScreen
 import com.example.seccouncil.ui.theme.urbanist
 import com.example.seccouncil.videoplayer.ResponsiveCourseDetailScreenOnPurchase
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 
 
@@ -93,10 +99,12 @@ import kotlinx.coroutines.flow.Flow
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun HomeScreen(
-    userDetails: Flow<UserDetails> ,
+    userDetails: Flow<UserDetails>,
     profileViewmodel: HomescreenViewmodel,
     scope: CoroutineScope,
-    paymentViewModel: PaymentViewModel
+    paymentViewModel: PaymentViewModel,
+    navController2: NavHostController,
+    onLogoutClicked: () -> Job
 ) {
     val navController1 = rememberNavController()
     val currentDestination = navController1.currentBackStackEntryAsState().value?.destination?.route
@@ -106,6 +114,7 @@ fun HomeScreen(
 
     // State to track fullscreen mode
     var isFullScreen by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -157,11 +166,20 @@ fun HomeScreen(
             composable("profile") {
                 ProfileScreen(
                     onProfileClicked = { navController1.navigate("profileSetting") },
+                    onBackClicked = {navController1.popBackStack()},
                     name = userDetail.value?.name ?: "",
                     email = userDetail.value?.emailAddress ?: "",
                     viewModel = profileViewmodel,
                     scope = scope,
-                    onBackClicked = {navController1.popBackStack()}
+                    onLogoutClicked = {
+                        onLogoutClicked()
+                        navController2.navigate(Routes.Signup.name) {
+                            popUpTo(0) {  // or popUpTo(NavController.graph.startDestinationId)
+                                inclusive = true
+                            }
+                            launchSingleTop = true
+                        }
+                    }
                 )
             }
             composable("Assignment") {
@@ -261,6 +279,11 @@ fun BottomNavigationBar(
             )
         }
     }
+}
+
+fun finishActivity(context: Context){
+    val activity = context as? Activity
+    activity?.finish()
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -605,7 +628,9 @@ fun CourseContent2(
     courseName:String = "",
     price:String = "",
     noOfStudnets:Int = 4,
-    onClick:()->Unit = {}
+    onClick:()->Unit = {},
+    subject: String = "14",
+    subjectTime: String = "12h 52m"
 ){
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -640,7 +665,9 @@ fun CourseContent2(
         ){
             EnrolledContent(
                 tint = Color.Black,
-                showEnroll = false
+                showEnroll = false,
+                subject = subject,
+                subjectTime = subjectTime
             )
             Spacer(Modifier.width(20.dp))
             StudentEnrolled(
