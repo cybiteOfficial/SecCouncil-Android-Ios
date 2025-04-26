@@ -3,11 +3,14 @@ package com.example.seccouncil.screens
 import android.app.Activity
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -15,14 +18,21 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,6 +41,8 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -67,6 +79,12 @@ fun Login(
             loginViewModel.isLoginSuccessful.value = false
         }
     }
+    LaunchedEffect(errorMessage) {
+        if (errorMessage.isNotEmpty()) {
+            Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+            loginViewModel.errorMessage.value = "" // Clear it after showing once
+        }
+    }
 
     LaunchedEffect(key1 = navigateToHomeScreen) {
         if (navigateToHomeScreen) {
@@ -74,11 +92,11 @@ fun Login(
             loginViewModel.navigateToHomeScreen.value = false
         }
     }
-    val activity = (LocalContext.current as? Activity)
+    val activity = (LocalActivity.current as? Activity)
+    // val activity = (LocalContext.current as? Activity)
     BackHandler(enabled = true) {
         activity?.finish()
     }
-
 
     Box(
         modifier = Modifier
@@ -128,6 +146,8 @@ fun LoginContent(
     onRegisterClick:()->Unit = {}
 ){
     val context = LocalContext.current
+    // State to control whether the Terms dialog is visible
+    var showTermsDialog by remember { mutableStateOf(false) }
     Column(
         modifier = modifier.fillMaxWidth()
     ) {
@@ -152,7 +172,8 @@ fun LoginContent(
             value = loginPassword,
             onValueChange = onPasswordChange,
             placeHolderText = "Enter your password",
-            imeAction = ImeAction.Done
+            imeAction = ImeAction.Done,
+            visualTransformation = PasswordVisualTransformation()
         )
         Spacer(Modifier.height(16.dp))
         Button(
@@ -217,9 +238,12 @@ fun LoginContent(
                     fontSize = 12.sp,
                     color = Color.Red
                 )
+                Toast.makeText(context,errorMessage,Toast.LENGTH_SHORT)
             }
             if (loginMessage.isNotEmpty()) {
                 Toast.makeText(context, loginMessage,Toast.LENGTH_SHORT)
+            }else{
+                Toast.makeText(context,"Something Went Wrong", Toast.LENGTH_SHORT)
             }
         }
 
@@ -229,6 +253,65 @@ fun LoginContent(
             clickabletext = "Register Now",
             onClick = onRegisterClick
         )
+        // -------------------------------------------------------------------
+        // 1. Terms & Conditions Clickable Text
+        // -------------------------------------------------------------------
+        // We add a centered text that the user can tap to read T&C.
+        Text(
+            text = "Read Terms and Conditions",
+            color = Color.Blue,                        // Make it stand out as a link
+            style = TextStyle(
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold
+            ),
+            textAlign = TextAlign.Center,              // Center the text horizontally
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable {
+                    // When tapped, show the dialog
+                    showTermsDialog = true
+                }
+                .padding(vertical = 12.dp)               // Add some spacing
+        )
+
+        // -------------------------------------------------------------------
+        // 2. Terms & Conditions Dialog
+        // -------------------------------------------------------------------
+        // Show an AlertDialog when showTermsDialog is true
+        if (showTermsDialog) {
+            AlertDialog(
+                onDismissRequest = {
+                    // Dismiss when the user touches outside or presses back
+                    showTermsDialog = false
+                },
+                title = {
+                    Text(
+                        text = "Terms and Conditions",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp
+                    )
+                },
+                text = {
+                    // Here you can put your full T&C text, or scrollable content.
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .verticalScroll(rememberScrollState())
+                    ) {
+                        Text(text = "1. You must be at least 18 years old to use this app.", fontSize = 14.sp)
+                        Spacer(Modifier.height(8.dp))
+                        Text(text = "2. Do not share your password with anyone.", fontSize = 14.sp)
+                        Spacer(Modifier.height(8.dp))
+                        Text(text = "3. We collect anonymous usage data to improve the experience.", fontSize = 14.sp)
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { showTermsDialog = false }) {
+                        Text(text = "OK")
+                    }
+                }
+            )
+        }
         Spacer(Modifier.height(28.dp))
     }
 }
