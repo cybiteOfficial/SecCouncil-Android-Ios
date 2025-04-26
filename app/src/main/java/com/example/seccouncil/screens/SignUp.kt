@@ -1,5 +1,6 @@
 package com.example.seccouncil.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,16 +14,21 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -34,6 +40,9 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -66,6 +75,8 @@ fun SignUp(
     val lastname by authViewModel.lastname
     val phoneNumber by authViewModel.phoneNumber
     val countryCode by authViewModel.countryCode
+    // State to control whether the Terms dialog is visible
+    var showTermsDialog by remember { mutableStateOf(false) }
 
     if (navigateToOtpScreen) {
         onClickToOTP()
@@ -118,6 +129,66 @@ fun SignUp(
                 clickabletext = "Login Now",
                 onClick = onLoginClicked
             )
+            // -------------------------------------------------------------------
+            // 1. Terms & Conditions Clickable Text
+            // -------------------------------------------------------------------
+            // We add a centered text that the user can tap to read T&C.
+            Text(
+                text = "Read Terms and Conditions",
+                color = Color.Blue,                        // Make it stand out as a link
+                style = TextStyle(
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold
+                ),
+                textAlign = TextAlign.Center,              // Center the text horizontally
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        // When tapped, show the dialog
+                        showTermsDialog = true
+                    }
+                    .padding(vertical = 12.dp)               // Add some spacing
+            )
+
+            // -------------------------------------------------------------------
+            // 2. Terms & Conditions Dialog
+            // -------------------------------------------------------------------
+            // Show an AlertDialog when showTermsDialog is true
+            if (showTermsDialog) {
+                AlertDialog(
+                    onDismissRequest = {
+                        // Dismiss when the user touches outside or presses back
+                        showTermsDialog = false
+                    },
+                    title = {
+                        Text(
+                            text = "Terms and Conditions",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp
+                        )
+                    },
+                    text = {
+                        // Here you can put your full T&C text, or scrollable content.
+                        // Here you can put your full T&C text, or scrollable content.
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .verticalScroll(rememberScrollState())
+                        ) {
+                            Text(text = "1. You must be at least 18 years old to use this app.", fontSize = 14.sp)
+                            Spacer(Modifier.height(8.dp))
+                            Text(text = "2. Do not share your password with anyone.", fontSize = 14.sp)
+                            Spacer(Modifier.height(8.dp))
+                            Text(text = "3. We collect anonymous usage data to improve the experience.", fontSize = 14.sp)
+                        }
+                    },
+                    confirmButton = {
+                        TextButton(onClick = { showTermsDialog = false }) {
+                            Text(text = "OK")
+                        }
+                    }
+                )
+            }
             Spacer(Modifier.height(if (screenHeight < 600.dp) 16.dp else 28.dp)) // ✅ Adaptive spacing
         }
         if (authViewModel.isLoading.value) {
@@ -155,8 +226,7 @@ fun SignUpContent(
     val screenWidth = configuration.screenWidthDp.dp
     val screenHeight = configuration.screenHeightDp.dp
 
-
-        Column(
+    Column(
             modifier = Modifier
                 .fillMaxWidth()
         ) {
@@ -222,7 +292,8 @@ fun SignUpContent(
                 placeHolderText = "Confirm password",
                 imeAction = ImeAction.Done,
                 value = confirmPassword,
-                onValueChange = onConfirmPasswordChange
+                onValueChange = onConfirmPasswordChange,
+                visualTransformation = PasswordVisualTransformation()
             )
             Spacer(modifier = Modifier.height(screenHeight * 0.05f))
             Button(
@@ -264,7 +335,8 @@ fun InputField(
     value:String = "",
     onValueChange:(String)->Unit = {""},
     startPadding: Dp = 25.dp,
-    endPadding: Dp = 15.dp
+    endPadding: Dp = 15.dp,
+    visualTransformation: VisualTransformation = VisualTransformation.None
 ){
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
@@ -293,7 +365,9 @@ fun InputField(
             color = colorResource(R.color.place_holder),
             fontSize = if (screenWidth < 360.dp) 12.sp else 14.sp, // ✅ Adaptive text size
         ) },
-        maxLines = 1
+        maxLines = 1,
+        visualTransformation = visualTransformation
+
     )
 }
 
