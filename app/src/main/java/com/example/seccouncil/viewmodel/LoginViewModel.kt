@@ -10,10 +10,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.seccouncil.model.UserDetails
+import com.example.seccouncil.model.UserProfilePhoto
 import com.example.seccouncil.network.ApiService
+import com.example.seccouncil.network.ErrorResponse
 import com.example.seccouncil.network.LoginRequest
 import com.example.seccouncil.network.getUserDetails.UserDetailsResponse
 import com.example.seccouncil.utlis.DataStoreManger
+import com.google.gson.Gson
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
@@ -80,46 +83,97 @@ class LoginViewModel(
             isLoading.value = true
             try {
                 val request = LoginRequest(
-                    email = loginEmail.value,
-                    password = loginPassword.value
+                    email = loginEmail.value.trim(),
+                    password = loginPassword.value.trim()
                 )
+                Log.e("LoginRequestCheck", "Email: ${loginEmail.value}, Password: ${loginPassword.value}")
                 // Call API
                 val response = ApiService.api.login(request)
-
+                Log.e("ApiResponse", "${response.isSuccessful} Code: ${response.code()} Body: ${response.body()?.success} ErrorBody: ${response.errorBody()?.string()}")
+//                if (response.isSuccessful && response.body()?.success == true) {
+//                    val token = response.body()?.token.orEmpty()
+//                    Log.e("Tokenn", "$token")
+//                    if (token.isNotEmpty()) {
+//                        // Store JWT token
+//                        DataStoreManger(context).saveJwtToken(token)
+//
+//                        // Fetch user details
+//                        val _userDetails = fetchUserDetails(context)
+//                        _userDetails?.let {
+//                            DataStoreManger(context).saveToDataStore(
+//                                UserDetails(
+//                                    emailAddress = it.data.email,
+//                                    name = "${it.data.firstName} ${it.data.lastName}",
+//                                    mobileNumber = it.data.contactNumber
+//                                )
+//                            )
+//                            DataStoreManger(context).saveUserProfileImage(
+//                                UserProfilePhoto(
+//                                    photo = _userDetails.data.image
+//                                )
+//                            )
+//                        }
+//                    }
+//                    isLoginSuccessful.value = true
+//                    loginMessage.value = response.body()?.message.orEmpty()
+//                    navigateToHomeScreen.value = true
+//                    Log.e("check", "login success")
+//                }
                 if (response.isSuccessful && response.body()?.success == true) {
                     val token = response.body()?.token.orEmpty()
-                    Log.e("Tokenn","$token")
+                    Log.e("Tokenn", "$token")
                     if (token.isNotEmpty()) {
-                        // Store JWT token in DataStore
+                        // Store JWT token
                         DataStoreManger(context).saveJwtToken(token)
-                        // Fetch user details
-                        val userDetails = fetchUserDetails(context)
 
-                        userDetails?.let {
-                            // Store user details in DataStore
+                        // Store user details directly from login response
+                        response.body()?.user?.let { user ->
                             DataStoreManger(context).saveToDataStore(
                                 UserDetails(
-                                    emailAddress = it.data.email,
-                                    name = "${it.data.firstName} ${it.data.lastName}",
-                                    mobileNumber = it.data.contactNumber
+                                    emailAddress = user.email,
+                                    name = "${user.firstName} ${user.lastName}",
+                                    mobileNumber = user.additionalDetails.contactNumber.orEmpty(),
+                                    gender = user.additionalDetails.gender.orEmpty(),
+                                    about = user.additionalDetails.about.orEmpty(),
+                                    dob = user.additionalDetails.dateOfBirth.orEmpty()
+                                )
+                            )
+                            DataStoreManger(context).saveUserProfileImage(
+                                UserProfilePhoto(
+                                    photo = user.image
                                 )
                             )
                         }
                     }
                     isLoginSuccessful.value = true
-                    loginMessage.value = response.body()?.message.orEmpty() // Save login state
+                    loginMessage.value = response.body()?.message.orEmpty()
                     navigateToHomeScreen.value = true
                     Log.e("check", "login success")
-                } else {
-                    val errorBody = response.errorBody()?.string().orEmpty()
-                    errorMessage.value = if (errorBody.isNotEmpty()) errorBody else "Login failed"
-                    isLoginSuccessful.value = false
-                    Log.e("check", "login failed: $errorBody")
                 }
-            } catch (e: Exception) {
+                else {
+                    // Only now read errorBody safely
+                    val errorBodyString = response.errorBody()?.string().orEmpty()
+                    val errorMessageFromResponse = try {
+                        val gson = Gson()
+                        val errorResponse = gson.fromJson(errorBodyString, ErrorResponse::class.java)
+                        errorResponse.message
+                    } catch (e: Exception) {
+                        "Login failed"
+                    }
+                    errorMessage.value = errorMessageFromResponse
+                    isLoginSuccessful.value = false
+                }
+            }catch (e: HttpException) {
                 handleNetworkError(e, "Login failed.")
                 isLoginSuccessful.value = false
-            } finally {
+            } catch (e: IOException) {
+                handleNetworkError(e, "No internet connection.")
+                isLoginSuccessful.value = false
+            } catch (e: Exception) {
+                handleNetworkError(e, "Unexpected error occurred.")
+                isLoginSuccessful.value = false
+            }
+            finally {
                 isLoading.value = false
             }
         }
