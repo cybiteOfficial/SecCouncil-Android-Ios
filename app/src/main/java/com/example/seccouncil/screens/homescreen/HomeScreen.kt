@@ -170,7 +170,6 @@ fun HomeScreen(
                     name = userDetail.value?.name ?: "",
                     email = userDetail.value?.emailAddress ?: "",
                     viewModel = profileViewmodel,
-                    scope = scope,
                     onLogoutClicked = {
                         onLogoutClicked()
                         navController2.navigate(Routes.Signup.name) {
@@ -179,7 +178,13 @@ fun HomeScreen(
                             }
                             launchSingleTop = true
                         }
-                    }
+                    },
+                    dob = userDetail.value?.dob?:"",
+                    gender = userDetail.value?.gender?:"",
+                    phoneNumber = userDetail.value?.mobileNumber?:"",
+
+                  //  scope = scope,
+                    about = userDetail.value?.about?:""
                 )
             }
             composable("Assignment") {
@@ -193,11 +198,8 @@ fun HomeScreen(
             }
             composable("profileSetting") {
                 ProfileSettingScreen(
-                    name = userDetail.value?.name ?: "",
-                    email = userDetail.value?.emailAddress ?: "",
-                    phoneNumber = userDetail.value?.mobileNumber ?: "",
                     viewModel = profileViewmodel,
-                    scope = scope,
+                    //scope = scope,
                     onBackClicked = {navController1.popBackStack()}
                 )
             }
@@ -241,7 +243,7 @@ fun BottomNavigationBar(
     val currentRoute = navController.currentBackStackEntry?.destination?.route
 
     // NavigationBar is a container for bottom navigation items.
-    NavigationBar {
+    NavigationBar() {
         // Loop through each navigation item (route and icon) from the list.
         navItemList.forEach { (route, icon) ->
             // Add a NavigationBarItem for each item in the list.
@@ -298,6 +300,7 @@ fun ContentScreen(
     profileViewmodel: HomescreenViewmodel,
     navController: NavController
 ) {
+    var searchText by remember { mutableStateOf("") }
 
     var refreshing by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
@@ -320,7 +323,10 @@ fun ContentScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(Modifier.height(20.dp))
-        ResponsiveSearchBar()
+        ResponsiveSearchBar(
+            value = searchText,
+            onValueChange = {searchText = it}
+        )
         Spacer(Modifier.height(20.dp))
         when (val allCoursesResult = getAllCourseResult.value) {
 
@@ -358,7 +364,10 @@ fun ContentScreen(
                                         noOfStudnets = course.studentsEnrolled.size,
                                         onClick = {
                                             navController.navigate("courseDetail/${course._id}")
-                                        }
+                                        },
+                                        subjectAuthor = course.instructor.firstName + course.instructor.lastName,
+                                        courseId = course._id
+
                                     )
                                 }
                             }
@@ -630,8 +639,12 @@ fun CourseContent2(
     noOfStudnets:Int = 4,
     onClick:()->Unit = {},
     subject: String = "14",
-    subjectTime: String = "12h 52m"
+    subjectAuthor: String = "None",
+    courseId: String = ""
 ){
+    //val ratingResponse = getAverageRatingManually(courseId)
+//    Log.i("RAting response","$ratingResponse")
+
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.Start
@@ -667,7 +680,8 @@ fun CourseContent2(
                 tint = Color.Black,
                 showEnroll = false,
                 subject = subject,
-                subjectTime = subjectTime
+                subjectAuthor = subjectAuthor,
+                rating = " 5"
             )
             Spacer(Modifier.width(20.dp))
             StudentEnrolled(
@@ -739,4 +753,3 @@ fun OnError(
         )
     }
 }
-
