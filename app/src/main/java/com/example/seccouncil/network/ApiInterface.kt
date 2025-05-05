@@ -1,19 +1,30 @@
 package com.example.seccouncil.network
 
+import com.example.seccouncil.network.ResetPassword.ResetPasswordRequest
+import com.example.seccouncil.network.ResetPassword.ResetPasswordResponse
 import com.example.seccouncil.network.capturePayment.capturePaymentResponseX
 import com.example.seccouncil.network.getAllCourseDetailsModel.GetAllCourse
+import com.example.seccouncil.network.getAverageRating.getAverageRatingRequest
+import com.example.seccouncil.network.getAverageRating.getAverageRatingResponse
 import com.example.seccouncil.network.getCourseDetail.GetCourseDetail
 import com.example.seccouncil.network.getCourseDetail.GetCourseDetailRequest
 import com.example.seccouncil.network.getEnrolledCourse.EnrolledCourse
 import com.example.seccouncil.network.getFullCourseDetails.getFullCourseDetailResponse
 import com.example.seccouncil.network.getUserDetails.UserDetailsResponse
+import com.example.seccouncil.network.updateProfile.updateProfileRequest
+import com.example.seccouncil.network.updateProfile.updateProfileResponse
 import com.example.seccouncil.network.updateProfilePicture.UpdateProfilePictureResponse
 import com.example.seccouncil.network.verifyPaymentRequest.verifyPaymentRequest
 import com.google.gson.annotations.SerializedName
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.HTTP
 import retrofit2.http.Header
 import retrofit2.http.Multipart
 import retrofit2.http.POST
@@ -106,6 +117,10 @@ data class verifyPaymentResponse(
 data class CourseRequest(
     val courseId: String
 )
+data class ErrorResponse(
+    val success: Boolean,
+    val message: String
+)
 
 
 interface ApiInterface {
@@ -165,12 +180,19 @@ interface ApiInterface {
         @Body request : CourseRequest
     ):Response<getFullCourseDetailResponse>
 
-}
+    @POST("/api/v1/auth/reset-password-token")
+    suspend fun resetPassword(
+        @Body request: ResetPasswordRequest
+    ): Response<ResetPasswordResponse>
 
-/*
-* @POST("/endpoint")
-* suspend fun verifyPayment(
-* @Header("Authorization")authHeader:String,
-* @Body request:Request
-* ):Resoponse<PaymentResponse>
-* */
+    @PUT("/api/v1/profile/updateProfile")
+    suspend fun updateProfile(
+        @Header("Authorization") authHeader: String,
+        @Body request: updateProfileRequest
+    ): Response<updateProfileResponse>
+
+    @HTTP(method = "GET", path = "/api/v1/course/getAverageRating", hasBody = true)
+    suspend fun getAverageRatingWithBody(
+        @Body request: getAverageRatingRequest
+    ): Response<getAverageRatingResponse>
+}
