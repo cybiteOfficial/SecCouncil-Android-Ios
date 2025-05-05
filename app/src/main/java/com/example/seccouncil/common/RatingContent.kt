@@ -81,8 +81,12 @@ fun RatingContent(
 @Preview(showBackground = true)
 @Composable
 fun EnrolledContent(
+    subject: String = "14",
     showEnroll:Boolean = true,
-    tint:Color =  Color.Unspecified
+    tint:Color =  Color.Unspecified,
+    subjectAuthor: String = "None",
+    subjectTime: String = "12h 30min",
+    rating: String = "5.0"
 ){
     Row(
         modifier = Modifier
@@ -90,12 +94,14 @@ fun EnrolledContent(
         verticalAlignment = Alignment.CenterVertically
     ){
         EnrollSubContent(
-            tint = tint
+            tint = tint,
+            icon = R.drawable.baseline_person_24,
+            subject = subjectAuthor
         )
         Spacer(Modifier.width(20.dp))
         EnrollSubContent(
-            icon = R.drawable.material_symbols_menu_book_outline,
-            subject = "14 Lessons",
+            icon = R.drawable.star,
+            subject = rating,
             tint = tint
         )
         if(showEnroll){
