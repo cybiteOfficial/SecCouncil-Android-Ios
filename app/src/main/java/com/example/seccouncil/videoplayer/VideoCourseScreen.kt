@@ -64,6 +64,7 @@ import com.example.seccouncil.common.EnrolledContent
 import com.example.seccouncil.common.RatingContent
 import com.example.seccouncil.common.TextComm
 import com.example.seccouncil.network.getAllCourseDetailsModel.NetworkResponse
+import com.example.seccouncil.network.getFullCourseDetails.RatingAndReview
 import com.example.seccouncil.screens.homescreen.ExpandableCard
 import com.example.seccouncil.screens.homescreen.HomescreenViewmodel
 import com.example.seccouncil.screens.homescreen.OnError
@@ -72,11 +73,10 @@ import com.example.seccouncil.screens.homescreen.OnLoading
 
 @OptIn(UnstableApi::class)
 @RequiresApi(Build.VERSION_CODES.P)
-@Preview(showSystemUi = true)
 @Composable
 fun ResponsiveCourseDetailScreenOnPurchase(
     homescreenViewmodel: HomescreenViewmodel,
-    courseId:String,
+    courseId:String = "",
     videoUri: String = "",
     isFullScreen: Boolean = false,
     onFullScreenToggle: (Boolean) -> Unit = { false },
@@ -173,6 +173,8 @@ fun ResponsiveCourseDetailScreenOnPurchase(
     when (val result = courseDetailResult) {
         is NetworkResponse.Loading -> OnLoading()
         is NetworkResponse.Success ->{
+            // calculate rating for the course
+            val rating = courseRating(result.data.data.courseDetails.ratingAndReviews.size,result.data.data.courseDetails.ratingAndReviews)
             Column(
                 modifier = Modifier
                     .then(
@@ -290,9 +292,16 @@ fun ResponsiveCourseDetailScreenOnPurchase(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    EnrolledContent(tint = Color.Black, showEnroll = false)
+                    EnrolledContent(
+                        tint = Color.Black, showEnroll = false,
+                        subject = result.data.data.courseDetails.courseContent.size.toString(),
+                        subjectTime = result.data.data.totalDuration.toString()
+                    )
                     Spacer(Modifier.width(8.dp))
-                    RatingContent()
+                    RatingContent(
+                        courseRating = rating,
+                        totalGivenRating = result.data.data.courseDetails.ratingAndReviews.size.toString()
+                    )
                 }
                 Spacer(Modifier.height(8.dp))
 
@@ -363,7 +372,7 @@ fun ResponsiveCourseDetailScreenOnPurchase(
 fun ResponsiveCourseDetailContent(
     index: Int = 1,
     textSize: Dp = 16.dp,
-    videoItem: VideoItem = VideoItem("", "Getting Started", "", "", 10.3f)
+    videoItem: VideoItem = VideoItem("", "Getting Started", "", "", 10.36f)
 ) {
     Box(
         modifier = Modifier
@@ -379,7 +388,7 @@ fun ResponsiveCourseDetailContent(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 4.dp),
+                .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             TextComm(
@@ -390,11 +399,31 @@ fun ResponsiveCourseDetailContent(
             )
             Spacer(Modifier.weight(1f))
             TextComm(
-                text = "${videoItem.durationSeconds} Mins",
+                text = "${videoItem.durationSeconds.formatToTwoDecimalPlaces()} Mins",
                 fontSize = with(LocalDensity.current) { (textSize * 0.8f).toSp() },
                 lineHeight = with(LocalDensity.current) { textSize.toSp() },
                 color = Color.Gray
             )
         }
+
     }
+}
+
+// Extension function to format Double to two decimal places without rounding
+fun Float.formatToTwoDecimalPlaces(): String {
+    val truncatedValue = (this * 100).toInt() / 100.0
+    return String.format("%.2f", truncatedValue)
+}
+fun Float.formatToOneDecimalPlaces(): String {
+    val truncatedValue = (this * 100).toInt() / 100.0
+    return String.format("%.1f", truncatedValue)
+}
+
+private fun courseRating(totalRating: Int, rating: List<RatingAndReview>): String{
+var ratingSum = 0
+    for (rat in rating){
+        ratingSum+=rat.rating
+    }
+    val finalrating = (ratingSum/totalRating.toFloat()).formatToOneDecimalPlaces()
+return finalrating.toString()
 }
