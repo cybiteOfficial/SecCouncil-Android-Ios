@@ -9,7 +9,9 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.example.seccouncil.common.ProfileImage
 import com.example.seccouncil.model.UserDetails
+import com.example.seccouncil.model.UserProfilePhoto
 import com.example.seccouncil.network.ApiService
 import com.example.seccouncil.network.ApiService.api
 import com.example.seccouncil.network.LoginRequest
@@ -38,9 +40,13 @@ class DataStoreManger(val context: Context) {
         val PASSWORD = stringPreferencesKey("PASSWORD")
         val MOBILE_NUMBER = stringPreferencesKey("PHONE")
         val NAME = stringPreferencesKey("NAME")
+        val DOB = stringPreferencesKey("DOB")
+        val GENDER = stringPreferencesKey("GENDER")
+        val ABOUT = stringPreferencesKey("ABOUT")
         val IMAGE_FILE_NAME = stringPreferencesKey("image_file_name")
         private val PURCHASED_COURSES_KEY = stringSetPreferencesKey("purchased_courses")
         private val JWT_TOKEN_KEY = stringPreferencesKey("jwt_token")
+        val PROFILE_IMAGE = stringPreferencesKey("profile_image")
     }
 
     // Suspend function to save user details to DataStore
@@ -54,7 +60,39 @@ class DataStoreManger(val context: Context) {
             it[PASSWORD] = userDetails.password
             it[MOBILE_NUMBER] = userDetails.mobileNumber
             it[NAME] = userDetails.name
+            it[DOB] = userDetails.dob
+            it[GENDER]  = userDetails.gender
+            it[ABOUT] = userDetails.about
         }
+    }
+    suspend fun saveAdditionalDetails(
+        dob: String,
+        firstName: String,
+        lastName: String,
+        phoneNumber: String,
+        gender: String,
+        about: String
+    ){
+        context.preferenceDataStore.edit {
+            it[DOB] = dob
+            it[MOBILE_NUMBER] = phoneNumber
+            it[NAME] = "$firstName $lastName"
+            it[GENDER] = gender
+            it[ABOUT] = about
+        }
+    }
+    suspend fun saveUserProfileImage(userProfile: UserProfilePhoto){
+
+        context.preferenceDataStore.edit {
+            it[PROFILE_IMAGE] = userProfile.photo
+            Log.d("ProfileImage_","${it[PROFILE_IMAGE]} ... ")
+        }
+
+    }
+    fun getFromSavedProfileImage()=context.preferenceDataStore.data.map {
+        UserProfilePhoto(
+            photo = it[PROFILE_IMAGE]?:""
+        )
     }
 
     // Function to retrieve user details from DataStore
@@ -65,7 +103,10 @@ class DataStoreManger(val context: Context) {
         UserDetails(
             emailAddress = it[EMAIL] ?: "",
             name = it[NAME] ?: "",
-            mobileNumber = it[MOBILE_NUMBER] ?: ""
+            mobileNumber = it[MOBILE_NUMBER] ?: "",
+            dob =  it[DOB]?:"",
+            about = it[ABOUT]?:"",
+            gender = it[GENDER]?:""
         )
     }
 
@@ -151,6 +192,11 @@ class DataStoreManger(val context: Context) {
     fun getStoredToken(): Flow<String?> {
         return context.preferenceDataStore.data.map { preferences ->
             preferences[JWT_TOKEN_KEY]
+        }
+    }
+    suspend fun clearProfileImage(){
+        context.preferenceDataStore.edit { preferences->
+            preferences.remove(PROFILE_IMAGE)
         }
     }
 
