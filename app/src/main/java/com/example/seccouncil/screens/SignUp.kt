@@ -1,5 +1,6 @@
 package com.example.seccouncil.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,13 +13,17 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -32,10 +37,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -43,6 +53,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -53,7 +64,9 @@ import com.example.seccouncil.common.BottomContent
 import com.example.seccouncil.common.BottomText
 import com.example.seccouncil.common.CountryPicker
 import com.example.seccouncil.common.Dividerr
+import com.example.seccouncil.ui.theme.urbanist
 import com.rejowan.ccpc.Country
+import kotlin.coroutines.coroutineContext
 
 
 @Preview(showBackground = true, showSystemUi = true)
@@ -116,12 +129,15 @@ fun SignUp(
             )
 
             BottomContent()
+            val context = LocalContext.current
             if (errorMessage.isNotEmpty()) {
-                Text(
-                    text = errorMessage,
-                    fontSize = 12.sp,
-                    color = Color.Red
-                )
+//                Text(
+//                    text = errorMessage,
+//                    fontSize = 12.sp,
+//                    color = Color.Red
+//                )
+                Toast.makeText(context,errorMessage,Toast.LENGTH_SHORT)
+
             }
             Spacer(Modifier.height(screenHeight * 0.015f))
             BottomText(
@@ -134,11 +150,16 @@ fun SignUp(
             // -------------------------------------------------------------------
             // We add a centered text that the user can tap to read T&C.
             Text(
-                text = "Read Terms and Conditions",
-                color = Color.Blue,                        // Make it stand out as a link
+                text = "Read Terms and Conditions", // Make it stand out as a link
                 style = TextStyle(
                     fontSize = 14.sp,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.SemiBold,
+                    brush = Brush.linearGradient(
+                        colors = listOf(
+                            Color(0xFF39B6FF), // Start color
+                            Color(0xFF5271FF)  // End color
+                        )
+                    )
                 ),
                 textAlign = TextAlign.Center,              // Center the text horizontally
                 modifier = Modifier
@@ -149,6 +170,32 @@ fun SignUp(
                     }
                     .padding(vertical = 12.dp)               // Add some spacing
             )
+//            BasicText(
+//                text = buildAnnotatedString {
+//                    withStyle(
+//                        style = SpanStyle(
+//                            brush = Brush.linearGradient(
+//                                colors = listOf(
+//                                    Color(0xFF39B6FF), // Start color
+//                                    Color(0xFF5271FF)  // End color
+//                                )
+//                            ),
+//                            fontSize = 14.sp,
+//                            fontWeight = FontWeight.Bold,
+//                            fontFamily = urbanist
+//                        )
+//                    )
+//                    {
+//                        "Read Terms and Conditions"
+//                    }
+//                },
+//                modifier = Modifier
+//                    .clickable {
+//                        // When tapped, show the dialog
+//                        showTermsDialog = true
+//                    }
+//                    .padding(vertical = 1.dp)               // Add some spacing
+//            )
 
             // -------------------------------------------------------------------
             // 2. Terms & Conditions Dialog
@@ -285,7 +332,8 @@ fun SignUpContent(
                 placeHolderText = "Password",
                 imeAction = ImeAction.Next,
                 value = password,
-                onValueChange = onPasswordChange
+                onValueChange = onPasswordChange,
+                isPasswordField = true
             )
             Spacer(modifier = Modifier.height(screenHeight * 0.015f))
             InputField(
@@ -293,7 +341,7 @@ fun SignUpContent(
                 imeAction = ImeAction.Done,
                 value = confirmPassword,
                 onValueChange = onConfirmPasswordChange,
-                visualTransformation = PasswordVisualTransformation()
+                isPasswordField = true
             )
             Spacer(modifier = Modifier.height(screenHeight * 0.05f))
             Button(
@@ -336,10 +384,20 @@ fun InputField(
     onValueChange:(String)->Unit = {""},
     startPadding: Dp = 25.dp,
     endPadding: Dp = 15.dp,
-    visualTransformation: VisualTransformation = VisualTransformation.None
+    isPasswordField: Boolean = false              // ✅ New parameter to enable password toggle icon
+
 ){
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
+    // ✅ State to toggle password visibility when "eye" icon is clicked
+    var passwordVisible by remember { mutableStateOf(false) }
+
+    // ✅ Final transformation logic — shows or hides password based on state
+    val visualTransformation = if (isPasswordField && !passwordVisible) {
+        PasswordVisualTransformation()
+    } else {
+        VisualTransformation.None
+    }
     TextField(
         value = value,
         onValueChange = onValueChange,
@@ -366,6 +424,27 @@ fun InputField(
             fontSize = if (screenWidth < 360.dp) 12.sp else 14.sp, // ✅ Adaptive text size
         ) },
         maxLines = 1,
+        // ✅ Conditionally show trailing eye icon for password field
+        trailingIcon = {
+            if (isPasswordField) {
+                val image = if (passwordVisible)
+                    painterResource(R.drawable.outline_visibility_24)
+                else
+                    painterResource(R.drawable.outline_visibility_off_24)
+
+                val description = if (passwordVisible) "Hide password" else "Show password"
+
+                IconButton (onClick = {
+                    passwordVisible = !passwordVisible // Toggle the state
+                }) {
+                    Icon(
+                        painter = image,
+                        contentDescription = description,
+                        tint = Color.Gray
+                    )
+                }
+            }
+        },
         visualTransformation = visualTransformation
 
     )
