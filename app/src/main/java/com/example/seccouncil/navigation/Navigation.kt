@@ -1,6 +1,9 @@
 package com.example.seccouncil.navigation
 
 import android.content.Context
+import android.os.Build
+import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -16,12 +19,18 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.seccouncil.common.ProfileImage
+import com.example.seccouncil.network.ApiService
+import com.example.seccouncil.network.repository.AuthRepository
 import com.example.seccouncil.payment_gateway.PaymentViewModel
 import com.example.seccouncil.screens.Login
 import com.example.seccouncil.screens.Otp
 import com.example.seccouncil.screens.SignUp
 import com.example.seccouncil.screens.SignUpViewModel
 import com.example.seccouncil.screens.SignUpViewModelFactory
+import com.example.seccouncil.screens.forgetPassword.ForgetPasswordScreen
+import com.example.seccouncil.screens.forgetPassword.ForgetPasswordViewModel
+import com.example.seccouncil.screens.forgetPassword.ForgetPasswordViewModelFactory
 import com.example.seccouncil.screens.homescreen.HomeScreen
 import com.example.seccouncil.screens.homescreen.HomescreenViewmodel
 import com.example.seccouncil.screens.homescreen.MyViewModelFactory
@@ -31,6 +40,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
+@RequiresApi(Build.VERSION_CODES.P)
 @Composable
 fun Navigation(
     // NavController to manage app navigation, with a default value using rememberNavController
@@ -44,6 +54,9 @@ fun Navigation(
     paymentViewModel: PaymentViewModel
 //    startRazorpayPayment:()->Unit
 ) {
+    ProfileImage.profileImage = dataStoreManger.getFromSavedProfileImage()
+    Log.d("ProfileImage_","${ProfileImage.profileImage}")
+
     // Initialize ViewModel using factory pattern
     // This ViewModel handles sign-up related logic
     val authViewModel: SignUpViewModel = viewModel(
@@ -56,6 +69,11 @@ fun Navigation(
                     popUpTo(Routes.Signup.name) { inclusive = true }
                 }
             }
+        )
+    )
+    val forgetPasswordViewModel: ForgetPasswordViewModel = viewModel(
+        factory = ForgetPasswordViewModelFactory(
+            repository = AuthRepository(ApiService.api)
         )
     )
 
@@ -78,7 +96,11 @@ fun Navigation(
     val onLogout = {
         isRegistered = false
         scope.launch {
-            dataStoreManger.clearDataStore()
+            dataStoreManger.apply {
+                clearProfileImage()
+                clearDataStore()
+                clearJwtToken()
+            }
         }
     }
 
@@ -131,7 +153,10 @@ fun Navigation(
                         popUpTo(Routes.Login.name) { inclusive = true }
                     }
                 },
-                onRegisterClick = { navController.navigate(Routes.Signup.name) }
+                onRegisterClick = { navController.navigate(Routes.Signup.name) },
+                onforgetPasswordClicked = {
+                    navController.navigate(Routes.ForgetPassword.name)
+                }
             )
         }
 
@@ -153,7 +178,18 @@ fun Navigation(
                 scope = scope
 //                startRazorpayPayment = startRazorpayPayment
                 ,
-                paymentViewModel = paymentViewModel
+                paymentViewModel = paymentViewModel,
+                navController2 = navController,
+                onLogoutClicked = onLogout
+
+            )
+        }
+        composable(
+            route = Routes.ForgetPassword.name
+        ) {
+            ForgetPasswordScreen(
+                viewModel = forgetPasswordViewModel,
+                navController = navController
             )
         }
     }
