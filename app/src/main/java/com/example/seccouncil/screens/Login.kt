@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -35,13 +34,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -61,7 +60,8 @@ import com.example.seccouncil.viewmodel.LoginViewModelFactory
 @Composable
 fun Login(
     onLoginClicked:()->Unit ={},
-    onRegisterClick: () -> Unit = {}
+    onRegisterClick: () -> Unit = {},
+    onforgetPasswordClicked:()-> Unit = {}
 ){
     val context = LocalContext.current
     val loginViewModel: LoginViewModel = viewModel(factory = LoginViewModelFactory(context))
@@ -114,7 +114,8 @@ fun Login(
             loginMessage = loginMessage,
             isLoading = isLoading,
             modifier = Modifier.align(Alignment.TopStart),
-            onRegisterClick = onRegisterClick
+            onRegisterClick = onRegisterClick,
+            onfogetPasswordClicked = onforgetPasswordClicked
         )
 
         if (isLoading) {
@@ -143,7 +144,8 @@ fun LoginContent(
     loginMessage: String,
     isLoading: Boolean,
     modifier: Modifier = Modifier,
-    onRegisterClick:()->Unit = {}
+    onRegisterClick:()->Unit = {},
+    onfogetPasswordClicked:()-> Unit = {}
 ){
     val context = LocalContext.current
     // State to control whether the Terms dialog is visible
@@ -173,7 +175,7 @@ fun LoginContent(
             onValueChange = onPasswordChange,
             placeHolderText = "Enter your password",
             imeAction = ImeAction.Done,
-            visualTransformation = PasswordVisualTransformation()
+            isPasswordField = true
         )
         Spacer(Modifier.height(16.dp))
         Button(
@@ -215,7 +217,11 @@ fun LoginContent(
                     fontFamily = urbanist,
                     fontWeight = FontWeight.SemiBold
                 ),
-                color = colorResource(R.color.forgetPassword)
+                color = colorResource(R.color.forgetPassword),
+                modifier = Modifier
+                    .clickable(
+                        onClick = onfogetPasswordClicked
+                    )
             )
         }
 
@@ -233,11 +239,11 @@ fun LoginContent(
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             if (errorMessage.isNotEmpty()) {
-                Text(
-                    text = errorMessage,
-                    fontSize = 12.sp,
-                    color = Color.Red
-                )
+//                Text(
+//                    text = errorMessage,
+//                    fontSize = 12.sp,
+//                    color = Color.Red
+//                )
                 Toast.makeText(context,errorMessage,Toast.LENGTH_SHORT)
             }
             if (loginMessage.isNotEmpty()) {
@@ -259,10 +265,15 @@ fun LoginContent(
         // We add a centered text that the user can tap to read T&C.
         Text(
             text = "Read Terms and Conditions",
-            color = Color.Blue,                        // Make it stand out as a link
             style = TextStyle(
                 fontSize = 14.sp,
-                fontWeight = FontWeight.SemiBold
+                fontWeight = FontWeight.SemiBold,
+                brush = Brush.linearGradient(
+                    colors = listOf(
+                        Color(0xFF39B6FF), // Start color
+                        Color(0xFF5271FF)  // End color
+                    )
+                )
             ),
             textAlign = TextAlign.Center,              // Center the text horizontally
             modifier = Modifier
