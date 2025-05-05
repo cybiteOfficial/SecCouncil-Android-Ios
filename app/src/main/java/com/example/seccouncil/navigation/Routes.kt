@@ -16,5 +16,6 @@ enum class Routes {
     Security,
     HelpCenter,
     Certification,
-    Splash
+    Splash,
+    ForgetPassword
 }
